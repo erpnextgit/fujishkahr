@@ -1,0 +1,137 @@
+/* Background - ultra soft, closest to white green */
+body, .page-container {
+	background-color: #f9fbf9 !important;       /* almost white with very subtle green tint */
+}
+
+/* Top Navbar - fresh but softer green */
+header.navbar {
+	background-color: #5fb966 !important;       /* softened medium green */
+	border-bottom: none !important;
+}
+
+/* Navbar text & icons - high contrast black (good readability) */
+header.navbar a,
+header.navbar .navbar-brand,
+header.navbar .icon {
+	color: #000000 !important;
+}
+
+/* Sidebar - matching very light body */
+.desk-sidebar {
+	background-color: #e3f0e3 !important;
+	border-right: 1px solid #d4edda !important; /* very light green border */
+}
+
+/* Sidebar selected item - gentle highlight */
+.desk-sidebar .selected {
+	background-color: #d4edda !important;       /* very soft selected green */
+	color: #1a3c34 !important;                 /* deep green-black for contrast */
+	font-weight: 600;
+}
+
+/* Sidebar text - darker green for readability */
+.desk-sidebar a {
+	color: #1e4d2e !important;
+}
+
+/* Primary Buttons - friendly soft green */
+.btn-primary {
+	background-color: #69c56d !important;
+	border-color: #69c56d !important;
+}
+.btn-primary:hover {
+	background-color: #5fb966 !important;
+}
+
+/* Cards & Widgets - extremely light green */
+.widget, .card,
+.page-card, .dashboard-card {
+	background-color: #e3f0e3 !important;       /* same ultra-light base */
+	border-radius: 12px !important;
+	box-shadow: 0 4px 16px rgba(105, 197, 109, 0.07) !important; /* softer shadow */
+}
+
+/* Main content areas - unified light base */
+.section-body,
+.layout-main-section,
+.list-row,
+.form-section,
+.form-dashboard,
+.list-view-container,
+.list-view-layout,
+.view-list,
+.widget-footer {
+	background-color: #f3f9f3 !important;
+}
+
+/* Table/List header - very gentle contrast */
+.list-row-head,
+.grid-heading-row {
+	background-color: #e8f5e8 !important;       /* extremely soft mint */
+	color: #1e4d2e !important;
+}
+
+/* List rows */
+.list-row {
+	background-color: #e3f0e3 !important;
+}
+.list-row:hover {
+	background-color: #e8f5e8 !important;       /* whisper-light hover */
+}
+
+/* Filter pills & toolbar - blend in nicely */
+.filter-area,
+.filter-pill,
+.list-filter,
+.list-view-actions,
+.list-toolbar {
+	background-color: #e3f0e3 !important;
+}
+
+/* Pagination - subtle green */
+.list-footer,
+.list-paging-area {
+	background-color: #e8f5e8 !important;
+}
+
+/* Search / Command palette - very clean */
+.awesomplete > ul,
+.search-bar-dropdown,
+.command-palette {
+	background-color: #e3f0e3 !important;
+	border: 1px solid #d4edda !important;
+}
+
+.awesomplete > ul > li,
+.command-palette .result {
+	background-color: #e3f0e3 !important;
+	color: #1e4d2e !important;
+}
+
+.awesomplete > ul > li[aria-selected="false"].category,
+.command-palette .result-group-title {
+	background-color: #e3f0e3 !important;
+	color: #2b6a3f !important;
+	font-weight: 600;
+}
+
+.awesomplete > ul > li:hover,
+.awesomplete > ul > li[aria-selected="true"],
+.command-palette .result:hover {
+	background-color: #e8f5e8 !important;
+}
+
+/* Page header - soft & elegant green */
+.page-head,
+.page-head-content {
+	background-color: #e3f0e3 !important;       /* very light green header */
+}
+
+/* Page title & icons - dark green instead of white (better modern contrast) */
+.page-title,
+.page-title h1,
+.page-head a,
+.page-head .icon,
+.page-head button {
+	color: #1e4d2e !important;                 /* deep forest green */
+}
