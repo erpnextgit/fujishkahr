@@ -23,7 +23,9 @@ app_license = "mit"
 
 # Includes in <head>
 # ------------------
-
+app_include_css = [
+	"assets/fujishkahr/css/fujishka_theme.css"
+]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fujishkahr/css/fujishkahr.css"
 # app_include_js = "/assets/fujishkahr/js/fujishkahr.js"
