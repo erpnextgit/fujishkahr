@@ -1,6 +1,6 @@
 ### Fujishkahr
 
-ERPNext HR and Payroll
+ERP next - HR and Payroll
 
 ### Installation
 

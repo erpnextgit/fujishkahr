@@ -1,7 +1,7 @@
 app_name = "fujishkahr"
 app_title = "Fujishkahr"
 app_publisher = "erpnextgit@fujishkaerp.in"
-app_description = "ERPNext HR and Payroll"
+app_description = "ERP next - HR and Payroll"
 app_email = "erpnextgit@fujishkaerp.in"
 app_license = "mit"
 

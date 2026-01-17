@@ -3,7 +3,7 @@ name = "fujishkahr"
 authors = [
     { name = "erpnextgit@fujishkaerp.in", email = "erpnextgit@fujishkaerp.in"}
 ]
-description = "ERPNext HR and Payroll"
+description = "ERP next - HR and Payroll"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
