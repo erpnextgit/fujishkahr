@@ -250,6 +250,15 @@ before_uninstall = "fujishkahr.install.before_uninstall"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+fixtures = [
+	{
+		"doctype": "Custom HTML Block",
+		"filters": [
+			["name", "=", "Welcome Message"]
+		]
+	}
+]
+
 # Translation
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.

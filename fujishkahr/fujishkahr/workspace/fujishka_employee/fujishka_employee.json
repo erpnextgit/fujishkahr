@@ -1,0 +1,67 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"yO5RGdLwLa\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Fujishka Employee</span>\",\"col\":12}},{\"id\":\"WA2pdWIw_R\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Welcome Message\",\"col\":12}},{\"id\":\"4h3BN5vt1q\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"GGUhL7v85E\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Task\",\"col\":3}},{\"id\":\"vVnF132WKR\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Task\",\"col\":3}},{\"id\":\"LYTNdPC2ks\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Working Task\",\"col\":3}},{\"id\":\"BXFp1fUdmT\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Completed Task\",\"col\":3}},{\"id\":\"0gQCAmgHH6\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Quick List</span>\",\"col\":12}},{\"id\":\"qcYLcx2BN-\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Attendance\",\"col\":4}},{\"id\":\"PQ4nrepsX1\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Leave Application\",\"col\":4}},{\"id\":\"DOvV7f8QnE\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Salary Slip\",\"col\":4}}]",
+ "creation": "2026-01-19 10:43:20.520309",
+ "custom_blocks": [
+  {
+   "custom_block_name": "Welcome Message",
+   "label": "Welcome Message"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "share",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Fujishka Employee",
+ "links": [],
+ "modified": "2026-01-19 11:17:00.714260",
+ "modified_by": "Administrator",
+ "module": "Fujishkahr",
+ "name": "Fujishka Employee",
+ "number_cards": [
+  {
+   "label": "Total Task",
+   "number_card_name": "Total Task"
+  },
+  {
+   "label": "Open Task",
+   "number_card_name": "Open Task"
+  },
+  {
+   "label": "Working Task",
+   "number_card_name": "Working Task"
+  },
+  {
+   "label": "Completed Task",
+   "number_card_name": "Completed Task"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Attendance",
+   "label": "Attendance",
+   "quick_list_filter": "[]"
+  },
+  {
+   "document_type": "Leave Application",
+   "label": "Leave Application",
+   "quick_list_filter": "[]"
+  },
+  {
+   "document_type": "Salary Slip",
+   "label": "Salary Slip",
+   "quick_list_filter": "[]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 40.0,
+ "shortcuts": [],
+ "title": "Fujishka Employee"
+}
