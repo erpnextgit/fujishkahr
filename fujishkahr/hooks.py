@@ -28,7 +28,7 @@ app_include_css = [
 ]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fujishkahr/css/fujishkahr.css"
-# app_include_js = "/assets/fujishkahr/js/fujishkahr.js"
+app_include_js = "/assets/fujishkahr/js/language_switcher.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/fujishkahr/css/fujishkahr.css"

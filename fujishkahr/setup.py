@@ -29,5 +29,5 @@ def get_fujishkahr_roles():
 	'''
 		Method to get fujishkahr specific roles
 	'''
-	return ['Fujishka HR']
+	return ['Fujishka HR', 'Fujishka Employee']
 
