@@ -135,3 +135,37 @@ header.navbar .icon {
 .page-head button {
 	color: #1e4d2e !important;                 /* deep forest green */
 }
+/* Side section backgrounds - consistent light green */
+.layout-side-section {
+  background-color: #e3f0e3 !important; /* soft light green */
+}
+
+/* Remove ERPNext inline background */
+.layout-side-section[style] {
+  background-color: #e3f0e3 !important;
+}
+
+/* Sidebar container inside workspace */
+.layout-side-section .list-sidebar,
+.layout-side-section .overlay-sidebar,
+.layout-side-section .desk-sidebar {
+  background-color: transparent !important;
+}
+
+/* Workspace main content */
+.layout-main-section-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Left sidebar */
+.layout-side-section {
+    border-radius: 12px;
+}
+
+/* Workspace cards (Employee, Attendance, Salary Slip) */
+.workspace-card,
+.widget,
+.dashboard-card {
+    border-radius: 12px !important;
+}
