@@ -1,171 +1,207 @@
-/* Background - ultra soft, closest to white green */
-body, .page-container {
-	background-color: #f9fbf9 !important;       /* almost white with very subtle green tint */
-}
+/**
+ * FUJISHKA THEME - MODERN CLEAN GREEN
+ * Brand Base: #0b7c58 (Forest)
+ * Accent Green: #10b981 (Emerald)
+ * Background: #f0f7f4 (Light Mint)
+ */
+/**
+ * FUJISHKA THEME - HEADER TEXT UPDATE
+ * Background: #0b7c58
+ * Text: #ffffff (White)
+ */
 
-/* Top Navbar - fresh but softer green */
-header.navbar {
-	background-color: #5fb966 !important;       /* softened medium green */
-	border-bottom: none !important;
-}
-
-/* Navbar text & icons - high contrast black (good readability) */
+/* Target all text elements in the top navigation bar */
 header.navbar a,
 header.navbar .navbar-brand,
-header.navbar .icon {
-	color: #000000 !important;
+header.navbar .icon,
+header.navbar .btn,
+header.navbar .dropdown-toggle,
+header.navbar .nav-link,
+header.navbar span {
+	color: #ffffff !important;
 }
 
-/* Sidebar - matching very light body */
-.desk-sidebar {
-	background-color: #e3f0e3 !important;
-	border-right: 1px solid #d4edda !important; /* very light green border */
+/* Specific fix for the English language switcher and Help text */
+header.navbar .btn-secondary,
+header.navbar .nav-item .nav-link {
+	color: #ffffff !important;
 }
 
-/* Sidebar selected item - gentle highlight */
-.desk-sidebar .selected {
-	background-color: #d4edda !important;       /* very soft selected green */
-	color: #1a3c34 !important;                 /* deep green-black for contrast */
-	font-weight: 600;
+/* Ensure icons (magnifying glass, bell, help) also turn white */
+header.navbar .icon use,
+header.navbar svg {
+	fill: #ffffff !important;
+	stroke: #ffffff !important;
 }
 
-/* Sidebar text - darker green for readability */
-.desk-sidebar a {
-	color: #1e4d2e !important;
+/* Optional: Add a slight hover effect so you know when you are clicking */
+header.navbar a:hover,
+header.navbar .btn:hover {
+	color: rgba(255, 255, 255, 0.8) !important;
+	text-decoration: none !important;
 }
 
-/* Primary Buttons - friendly soft green */
-.btn-primary {
-	background-color: #69c56d !important;
-	border-color: #69c56d !important;
-}
-.btn-primary:hover {
-	background-color: #5fb966 !important;
-}
-
-/* Cards & Widgets - extremely light green */
-.widget, .card,
-.page-card, .dashboard-card {
-	background-color: #e3f0e3 !important;       /* same ultra-light base */
-	border-radius: 12px !important;
-	box-shadow: 0 4px 16px rgba(105, 197, 109, 0.07) !important; /* softer shadow */
+/* 1. TOP NAVBAR SEARCH BAR */
+/* Targets the search input at the top of the screen */
+#navbar-search,
+.navbar-search,
+.search-bar input {
+	background-color: rgba(255, 255, 255, 0.15) !important; /* Semi-transparent over green */
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+	color: #ffffff !important;
+	border-radius: 8px !important;
 }
 
-/* Main content areas - unified light base */
-.section-body,
-.layout-main-section,
-.list-row,
-.form-section,
-.form-dashboard,
-.list-view-container,
-.list-view-layout,
-.view-list,
-.widget-footer {
-	background-color: #f3f9f3 !important;
+#navbar-search::placeholder {
+	color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Table/List header - very gentle contrast */
-.list-row-head,
-.grid-heading-row {
-	background-color: #e8f5e8 !important;       /* extremely soft mint */
-	color: #1e4d2e !important;
-}
-
-/* List rows */
-.list-row {
-	background-color: #e3f0e3 !important;
-}
-.list-row:hover {
-	background-color: #e8f5e8 !important;       /* whisper-light hover */
-}
-
-/* Filter pills & toolbar - blend in nicely */
-.filter-area,
-.filter-pill,
-.list-filter,
-.list-view-actions,
-.list-toolbar {
-	background-color: #e3f0e3 !important;
-}
-
-/* Pagination - subtle green */
-.list-footer,
-.list-paging-area {
-	background-color: #e8f5e8 !important;
-}
-
-/* Search / Command palette - very clean */
+/* Targets the "Search or type a command" result list */
 .awesomplete > ul,
 .search-bar-dropdown,
-.command-palette {
-	background-color: #e3f0e3 !important;
-	border: 1px solid #d4edda !important;
+.command-palette,
+.ui-autocomplete {
+	background-color: #1c926d !important; /* Soft Mint Shade */
+	border: 1px solid #0b7c58 !important; /* Brand Green Border */
+	border-radius: 12px !important;
+	box-shadow: 0 8px 24px rgba(11, 124, 88, 0.15) !important;
 }
 
-.awesomplete > ul > li,
-.command-palette .result {
-	background-color: #e3f0e3 !important;
-	color: #1e4d2e !important;
+/* Individual search result items */
+.awesomplete li, .command-palette .result {
+	background-color: transparent !important;
+	color: #1f2937 !important;
 }
 
-.awesomplete > ul > li[aria-selected="false"].category,
-.command-palette .result-group-title {
-	background-color: #e3f0e3 !important;
-	color: #2b6a3f !important;
+/* Hover/Selection in search results */
+.awesomplete li[aria-selected="true"],
+.awesomplete li:hover {
+	background-color: #d1e2dc !important; /* Slightly darker green tint */
+	color: #0b7c58 !important;
+}
+
+/* 3. GENERAL FORM INPUTS */
+/* Changes all standard white text boxes to green shades */
+input.form-control,
+select.form-control,
+textarea.form-control,
+.frappe-control input {
+	background-color: #e2ede9 !important; /* Soft Mint shade */
+	border: 1px solid #d1e2dc !important;
+	color: #1f2937 !important;
+}
+
+input.form-control:focus {
+	border-color: #0b7c58 !important; /* Brand green focus border */
+	box-shadow: 0 0 0 2px rgba(11, 124, 88, 0.1) !important;
+}
+
+/* 4. KEEPING THE BACKGROUND GREEN TINT */
+body, .layout-main-section, .page-container {
+	background-color: #f0f7f4 !important; /* Lightest mint wash */
+}
+
+/* 5. SIDEBAR & NAVBAR REMAINS AS PREVIOUSLY CONFIGURED */
+header.navbar {
+	background-color: #0b7c58 !important;
+}
+
+.desk-sidebar .selected {
+	background-color: transparent !important;
+	border: 1px solid #0b7c58 !important;
+}
+
+/* 3. SIDEBAR STYLING - UPDATED FOR "IMAGE 2" STYLE */
+.layout-side-section {
+	background-color: #e2ede9 !important;
+	border-radius: 12px !important;
+	margin: 15px 0 15px 15px !important;
+	padding: 10px !important;
+	border: 1px solid #c2dbd2 !important;
+}
+
+/* Sidebar Text & Icons */
+.desk-sidebar a,
+.sidebar-item-label,
+.desk-sidebar .icon {
+	color: #0b7c58 !important;
+}
+
+/* This removes the solid green block and adds the border highlight */
+.desk-sidebar .sidebar-item-container.active,
+.desk-sidebar .selected,
+.desk-sidebar .sidebar-item-container:hover {
+	background-color: rgba(11, 124, 88, 0.05) !important; /* Very faint tint on hover/active */
+	border: 1px solid #0b7c58 !important;         /* Brand Green Border */
+	border-radius: 8px !important;
 	font-weight: 600;
 }
 
-.awesomplete > ul > li:hover,
-.awesomplete > ul > li[aria-selected="true"],
-.command-palette .result:hover {
-	background-color: #e8f5e8 !important;
+/* Ensure text remains dark green and readable */
+.desk-sidebar .selected a,
+.desk-sidebar .selected .icon,
+.desk-sidebar .sidebar-item-container.active a,
+.desk-sidebar .sidebar-item-container.active .icon {
+	color: #0b7c58 !important;
 }
 
-/* Page header - soft & elegant green */
-.page-head,
-.page-head-content {
-	background-color: #e3f0e3 !important;       /* very light green header */
+/* 4. BUTTONS & ACTIONS */
+.btn-primary {
+	background-color: #10b981 !important; /* Emerald Green */
+	border-color: #10b981 !important;
+	color: #ffffff !important;
+	border-radius: 8px !important;
 }
 
-/* Page title & icons - dark green instead of white (better modern contrast) */
-.page-title,
-.page-title h1,
-.page-head a,
-.page-head .icon,
-.page-head button {
-	color: #1e4d2e !important;                 /* deep forest green */
-}
-/* Side section backgrounds - consistent light green */
-.layout-side-section {
-  background-color: #e3f0e3 !important; /* soft light green */
+.btn-primary:hover {
+	background-color: #0b7c58 !important;
 }
 
-/* Remove ERPNext inline background */
-.layout-side-section[style] {
-  background-color: #e3f0e3 !important;
+/* 5. CARDS & WIDGETS (Updated to Light Mint Surface) */
+.widget, .card, .workspace-card, .dashboard-card, .widget-box {
+	background-color: #e2ede9 !important; /* Matches sidebar tint */
+	border-radius: 12px !important;
+	border: 1px solid #d1f7e2 !important;
+	box-shadow: none !important; /* Flattening for the "Image 2" look */
 }
 
-/* Sidebar container inside workspace */
-.layout-side-section .list-sidebar,
-.layout-side-section .overlay-sidebar,
-.layout-side-section .desk-sidebar {
-  background-color: transparent !important;
+/* 6. ONBOARDING STEPS (The "Selling Settings" style) */
+.onboarding-step.pending.active,
+.onboarding-step:hover {
+	background-color: #ffffff !important; /* Pure white inside the border */
+	border-radius: 8px !important;
+	border: 1px solid #0b7c58 !important;
+	color: #0b7c58 !important;
 }
 
-/* Workspace main content */
-.layout-main-section-wrapper {
-    border-radius: 12px;
-    overflow: hidden;
+/* 7. TYPOGRAPHY */
+h1, h2, h3, .page-title, .sidebar-parent-item span {
+	color: #1f2937 !important;
 }
 
-/* Left sidebar */
-.layout-side-section {
-    border-radius: 12px;
+.text-muted {
+	color: #6b7280 !important;
 }
 
-/* Workspace cards (Employee, Attendance, Salary Slip) */
-.workspace-card,
-.widget,
-.dashboard-card {
-    border-radius: 12px !important;
+/* The main button style */
+#global-language-switcher {
+	width: 80px;
+	height: 26px;
+	margin-left: 15px;
+	margin-right: 10px;
+	background-color: #3f977b !important;
+	color: white !important;
+	border: 1px solid #35856c !important;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 0 5px;
+	outline: none;
+}
+
+/* Hover effect for the main selector */
+#global-language-switcher:hover {
+	background-color: #35856c !important;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
