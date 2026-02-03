@@ -41,5 +41,17 @@ def get_employee_custom_fields():
 				"label": "Employee Documents",
 				"insert_after": "employee_document_history_section",
 			},
+			{
+				"fieldtype": "Section Break",
+				"label": "Attendance Summary",
+				"fieldname": "sb_attendance_summary",
+				"insert_after": "connections_tab",
+			},
+			{
+				"fieldname": "custom_attendance_heatmap",
+				"fieldtype": "HTML",
+				"label": "Attendance Heatmap",
+				"insert_after": "sb_attendance_summary",
+			},
 		]
 	}
