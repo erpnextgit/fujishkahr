@@ -13,3 +13,4 @@ def get_default_probation_period():
 	"""
 	period = frappe.db.get_single_value("Fujishkahr Settings", "default_probation_period")
 	return int(period)
+
