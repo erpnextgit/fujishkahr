@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "timesheet_settings_section",
-  "hide_currency_fields"
+  "hide_currency_fields",
+  "probation_period_settings_section",
+  "default_probation_period"
  ],
  "fields": [
   {
@@ -20,13 +22,24 @@
    "fieldname": "timesheet_settings_section",
    "fieldtype": "Section Break",
    "label": "Timesheet Settings"
+  },
+  {
+   "fieldname": "default_probation_period",
+   "fieldtype": "Int",
+   "label": "Default Probation Period"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "probation_period_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Probation Period Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-05 10:09:15.937062",
+ "modified": "2026-02-05 12:02:35.628504",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Fujishkahr Settings",
