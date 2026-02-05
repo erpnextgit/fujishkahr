@@ -1,3 +1,6 @@
+// Copyright (c) 2026, erpnextgit@fujishkaerp.in and contributors
+// For license information, please see license.txt
+
 frappe.ui.form.on("Employee", {
 	refresh(frm) {
 		if (!frm.doc.name) return;
@@ -10,5 +13,43 @@ frappe.ui.form.on("Employee", {
 			employee: frm.doc.name,
 			year: new Date().getFullYear()
 		});
-	}
+	},
+	date_of_joining: function(frm) {
+		set_probation_dates(frm);
+	},
+	probation_start_date: function(frm) {
+		set_probation_dates(frm);
+	},
 });
+
+/*
+ * function to set probation start and end dates
+ * based on date of joining and default probation period from settings
+ */
+function set_probation_dates(frm) {
+	let start_date = frm.doc.probation_start_date || frm.doc.date_of_joining;
+	if(!start_date) return;
+
+	if(!frm.doc.probation_start_date) {
+		frm.set_value("probation_start_date", start_date);
+	}
+
+	if(!frm.doc.probation_end_date) {
+		frappe.call({
+			method: "fujishkahr.fujishkahr.custom_scripts.employee.employee.get_default_probation_period",
+			callback: function(r) {
+				if (r.message && r.message > 0) {
+					let end_date = frappe.datetime.add_days(start_date, r.message);
+					frm.set_value('probation_end_date', end_date);
+				} else {
+					frappe.msgprint({
+						title: __('Missing Data'),
+						message: __('Default Probation Period is not set in Fujishkahr Settings.'),
+						indicator: 'red'
+					});
+					frm.set_value('probation_end_date', null);
+				}
+			}
+		});
+	}
+}
