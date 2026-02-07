@@ -52,29 +52,83 @@ header.navbar .btn:hover {
 	color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Targets the "Search or type a command" result list */
-.awesomplete > ul,
-.search-bar-dropdown,
-.command-palette,
-.ui-autocomplete {
-	background-color: #1c926d !important; /* Soft Mint Shade */
-	border: 1px solid #0b7c58 !important; /* Brand Green Border */
-	border-radius: 12px !important;
-	box-shadow: 0 8px 24px rgba(11, 124, 88, 0.15) !important;
+/* GLOBAL SEARCH INPUT (Ctrl + G) */
+header.navbar .form-control.bold {
+	background-color: rgba(255, 255, 255, 0.15) !important;
+	border: 1px solid rgba(255, 255, 255, 0.25) !important;
+	color: #ffffff !important;
+	border-radius: 10px !important;
+	height: 34px;
 }
 
-/* Individual search result items */
-.awesomplete li, .command-palette .result {
+header.navbar .form-control.bold::placeholder {
+	color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Focus state */
+header.navbar .form-control.bold:focus {
+	border-color: #10b981 !important;
+	box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+	background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* COMMAND PALETTE / SEARCH DROPDOWN */
+.awesomplete > ul {
+	background-color: #1c926d !important;
+	border: 1px solid #0b7c58 !important;
+	border-radius: 14px !important;
+	padding: 6px !important;
+	box-shadow: 0 12px 28px rgba(11, 124, 88, 0.25) !important;
+}
+
+/* SEARCH RESULT ITEMS */
+.awesomplete li {
 	background-color: transparent !important;
-	color: #1f2937 !important;
+	color: #ecfdf5 !important; /* light mint text */
+	border-radius: 8px !important;
+	padding: 8px 10px !important;
+	font-weight: 500;
 }
 
-/* Hover/Selection in search results */
-.awesomplete li[aria-selected="true"],
-.awesomplete li:hover {
-	background-color: #d1e2dc !important; /* Slightly darker green tint */
+/* Title text */
+.awesomplete li span {
+	color: #ecfdf5 !important;
+}
+
+/* HOVER + SELECTED ITEM */
+.awesomplete li:hover,
+.awesomplete li[aria-selected="true"] {
+	background-color: #d1e2dc !important;
 	color: #0b7c58 !important;
 }
+
+/* Text inside selected row */
+.awesomplete li:hover span,
+.awesomplete li[aria-selected="true"] span {
+	color: #0b7c58 !important;
+	font-weight: 600;
+}
+
+/* GLOBAL SEARCH INPUT (Ctrl + G) */
+header.navbar .form-control.bold {
+	background-color: rgba(255, 255, 255, 0.15) !important;
+	border: 1px solid rgba(255, 255, 255, 0.25) !important;
+	color: #ffffff !important;
+	border-radius: 10px !important;
+	height: 34px;
+}
+
+header.navbar .form-control.bold::placeholder {
+	color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Focus state */
+header.navbar .form-control.bold:focus {
+	border-color: #10b981 !important;
+	box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+	background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
 
 /* 3. GENERAL FORM INPUTS */
 /* Changes all standard white text boxes to green shades */
@@ -200,4 +254,20 @@ h1, h2, h3, .page-title, .sidebar-parent-item span {
 #global-language-switcher:hover {
 	background-color: #35856c !important;
 	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* IMPERSONATION INDICATOR PILL */
+header.navbar .indicator-pill.red.no-indicator-dot {
+	background-color: #d1e2dc !important; /* Light mint green */
+	color: #0b7c58 !important;           /* Forest green text */
+	border: 1px solid #0b7c58 !important;
+	border-radius: 999px !important;
+	font-weight: 600;
+	padding: 4px 12px !important;
+}
+
+/* Optional: icon / text inside pill */
+header.navbar .indicator-pill.red.no-indicator-dot span,
+header.navbar .indicator-pill.red.no-indicator-dot i {
+	color: #0b7c58 !important;
 }
