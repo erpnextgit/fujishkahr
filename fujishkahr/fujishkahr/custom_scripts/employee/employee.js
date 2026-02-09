@@ -14,11 +14,18 @@ frappe.ui.form.on("Employee", {
 			year: new Date().getFullYear()
 		});
 	},
+	validate(frm) {
+		validate_probation_dates(frm);
+	},
 	date_of_joining: function(frm) {
 		set_probation_dates(frm);
 	},
 	probation_start_date: function(frm) {
 		set_probation_dates(frm);
+		validate_probation_dates(frm);
+	},
+	probation_end_date: function(frm) {
+		validate_probation_dates(frm);
 	},
 });
 
@@ -51,5 +58,30 @@ function set_probation_dates(frm) {
 				}
 			}
 		});
+	}
+}
+
+/*
+ * function to validate probation start and end dates
+ * 1. probation end date cannot be before probation start date
+ * 2. probation start date cannot be before date of joining
+ */
+function validate_probation_dates(frm) {
+	if (frm.doc.probation_start_date && frm.doc.probation_end_date) {
+		if (frm.doc.probation_end_date < frm.doc.probation_start_date) {
+			frappe.throw({
+				message: __('Probation End Date must be after Probation Start Date'),
+				title: __('Invalid Probation Date')
+			});
+		}
+	}
+
+	if (frm.doc.date_of_joining && frm.doc.probation_start_date) {
+		if (frm.doc.probation_start_date < frm.doc.date_of_joining) {
+			frappe.throw({
+				message: __('Probation Start Date must be after Date of Joining'),
+				title: __('Invalid Probation Date')
+			});
+		}
 	}
 }
