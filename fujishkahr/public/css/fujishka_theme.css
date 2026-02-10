@@ -98,7 +98,7 @@ header.navbar .form-control.bold:focus {
 /* HOVER + SELECTED ITEM */
 .awesomplete li:hover,
 .awesomplete li[aria-selected="true"] {
-	background-color: #d1e2dc !important;
+	background-color: #ffffff !important;
 	color: #0b7c58 !important;
 }
 
@@ -270,4 +270,32 @@ header.navbar .indicator-pill.red.no-indicator-dot {
 header.navbar .indicator-pill.red.no-indicator-dot span,
 header.navbar .indicator-pill.red.no-indicator-dot i {
 	color: #0b7c58 !important;
+}
+
+/* Search-style user dropdown */
+header.navbar .dropdown-menu {
+	background-color: #1c926d !important;
+	border: 1px solid #0b7c58 !important;
+	border-radius: 14px !important;
+	padding: 6px !important;
+	box-shadow: 0 12px 28px rgba(11, 124, 88, 0.25) !important;
+}
+
+/* Items */
+header.navbar .dropdown-menu .dropdown-item,
+header.navbar .dropdown-menu a,
+header.navbar .dropdown-menu button {
+	color: #ecfdf5 !important;
+	border-radius: 8px !important;
+	padding: 8px 12px !important;
+	font-weight: 500;
+}
+
+/* Hover */
+header.navbar .dropdown-menu .dropdown-item:hover,
+header.navbar .dropdown-menu a:hover,
+header.navbar .dropdown-menu button:hover {
+	background-color: #ffffff !important;
+	color: #0b7c58 !important;
+	font-weight: 600;
 }
