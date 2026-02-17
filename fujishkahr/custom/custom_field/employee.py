@@ -46,12 +46,15 @@ def get_employee_custom_fields():
 				"label": "Attendance Summary",
 				"fieldname": "sb_attendance_summary",
 				"insert_after": "connections_tab",
+				"collapsible": 1,
+				"depends_on": "eval: !doc.__islocal",
 			},
 			{
 				"fieldname": "custom_attendance_heatmap",
 				"fieldtype": "HTML",
 				"label": "Attendance Heatmap",
 				"insert_after": "sb_attendance_summary",
+				"depends_on": "eval: !doc.__islocal",
 			},
 		]
 	}
