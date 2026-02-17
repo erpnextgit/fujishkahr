@@ -2,6 +2,12 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from fujishkahr.custom.custom_field.employee import get_employee_custom_fields
+from fujishkahr.custom.custom_field.holiday_list import get_holiday_list_custom_fields
+from fujishkahr.custom.custom_field.leave_policy import get_leave_policy_custom_fields
+from fujishkahr.custom.custom_field.branch import get_branch_custom_fields
+from fujishkahr.custom.custom_field.company import get_company_custom_fields
+from fujishkahr.custom.custom_field.shift_type import get_shift_type_custom_fields
+from fujishkahr.custom.custom_field.leave_type import get_leave_type_custom_fields
 
 def after_install():
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
@@ -37,6 +43,12 @@ def get_custom_fields():
 		Method to get all custom fields that need to be created for PW IT Helpdesk and CM
 	'''
 	custom_fields = get_employee_custom_fields()
+	custom_fields.update(get_holiday_list_custom_fields())
+	custom_fields.update(get_leave_policy_custom_fields())
+	custom_fields.update(get_branch_custom_fields())
+	custom_fields.update(get_company_custom_fields())
+	custom_fields.update(get_shift_type_custom_fields())
+	custom_fields.update(get_leave_type_custom_fields())
 	return custom_fields
 
 def create_custom_roles(roles):
