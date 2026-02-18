@@ -27,6 +27,9 @@ frappe.ui.form.on("Employee", {
 	probation_end_date: function(frm) {
 		validate_probation_dates(frm);
 	},
+	company: function(frm) {
+		filter_reports_to_company(frm);
+	},
 });
 
 /*
@@ -84,4 +87,21 @@ function validate_probation_dates(frm) {
 			});
 		}
 	}
+}
+
+/*
+ * function to filter reports_to field based on selected company
+ * only active employees of the same company will be shown in the reports_to field
+ * current employee will be excluded from the list
+ */
+function filter_reports_to_company(frm) {
+	frm.set_query("reports_to", function(){
+		return {
+			filters: {
+				"company": frm.doc.company,
+				"status": "Active",
+				"name": ["!=", frm.doc.name]
+			}
+		}
+	})
 }
