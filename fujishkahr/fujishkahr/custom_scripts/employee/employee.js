@@ -29,6 +29,7 @@ frappe.ui.form.on("Employee", {
 	},
 	company: function(frm) {
 		filter_reports_to_company(frm);
+		filter_holiday_list(frm);
 	},
 });
 
@@ -101,6 +102,20 @@ function filter_reports_to_company(frm) {
 				"company": frm.doc.company,
 				"status": "Active",
 				"name": ["!=", frm.doc.name]
+			}
+		}
+	})
+}
+
+/*
+ * function to filter holiday list field based on selected company
+ * only holiday lists of the same company will be shown in the holiday list field
+ */
+function filter_holiday_list(frm) {
+	frm.set_query("holiday_list", function() {
+		return {
+			filters: {
+				"company": frm.doc.company
 			}
 		}
 	})
