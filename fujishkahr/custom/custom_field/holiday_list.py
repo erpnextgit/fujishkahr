@@ -10,7 +10,6 @@ def get_holiday_list_custom_fields():
 				"fieldname": "company",
 				"insert_after": "total_holidays",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}

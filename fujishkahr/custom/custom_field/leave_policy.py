@@ -15,7 +15,6 @@ def get_leave_policy_custom_fields():
 				"fieldname": "company",
 				"insert_after": "cb_leave_policy_1",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}
