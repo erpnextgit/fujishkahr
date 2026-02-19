@@ -10,7 +10,6 @@ def get_leave_type_custom_fields():
 				"fieldname": "company",
 				"insert_after": "max_continuous_days_allowed",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}

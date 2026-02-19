@@ -10,7 +10,6 @@ def get_shift_type_custom_fields():
 				"fieldname": "company",
 				"insert_after": "end_time",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}

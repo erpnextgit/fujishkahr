@@ -10,7 +10,6 @@ def get_employee_checkin_custom_fields():
 				"fieldname": "company",
 				"insert_after": "log_type",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}
