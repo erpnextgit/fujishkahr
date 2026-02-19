@@ -10,7 +10,6 @@ def get_user_custom_fields():
 				"fieldname": "company",
 				"insert_after": "username",
 				"options": "Company",
-				"reqd": 1,
 			},
 		]
 	}
