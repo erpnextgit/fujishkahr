@@ -10,6 +10,7 @@ from fujishkahr.custom.custom_field.shift_type import get_shift_type_custom_fiel
 from fujishkahr.custom.custom_field.leave_type import get_leave_type_custom_fields
 from fujishkahr.custom.custom_field.user import get_user_custom_fields
 from fujishkahr.custom.custom_field.employee_checkin import get_employee_checkin_custom_fields
+from fujishkahr.custom.custom_field.salary_component import get_salary_component_custom_fields
 
 def after_install():
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
@@ -53,6 +54,7 @@ def get_custom_fields():
 	custom_fields.update(get_leave_type_custom_fields())
 	custom_fields.update(get_user_custom_fields())
 	custom_fields.update(get_employee_checkin_custom_fields())
+	custom_fields.update(get_salary_component_custom_fields())
 	return custom_fields
 
 def create_custom_roles(roles):
