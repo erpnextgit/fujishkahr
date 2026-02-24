@@ -52,6 +52,7 @@ doctype_js = {
 	"Employee": "fujishkahr/custom_scripts/employee/employee.js",
 	"Timesheet": "fujishkahr/custom_scripts/timesheet/timesheet.js",
 	"Holiday List": "fujishkahr/custom_scripts/holiday_list/holiday_list.js",
+	"Employee Checkin": "fujishkahr/custom_scripts/employee_checkin/employee_checkin.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
