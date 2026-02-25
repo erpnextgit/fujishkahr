@@ -1,0 +1,138 @@
+# Copyright (c) 2026, erpnextgit@fujishkaerp.in
+# For license information, please see license.txt
+
+import frappe
+from frappe.utils import get_datetime, time_diff_in_hours
+
+BREAK_HOURS = 1
+SHIFT_WORKING_HOURS = 8
+
+def execute(filters=None):
+	columns = get_columns()
+	data = get_data(filters)
+	summary = get_summary(data)
+	filters.company = frappe.defaults.get_user_default("Company")
+	return columns, data, None, None, summary
+
+
+def get_columns():
+	return [
+		{"label": "Date", "fieldname": "attendance_date", "fieldtype": "Date", "width": 120},
+		{"label": "Employee ID", "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 120},
+		{"label": "Employee Name", "fieldname": "employee_name", "width": 180},
+		{"label": "Shift Type", "fieldname": "shift", "fieldtype": "Link", "options": "Shift Type", "width": 140},
+		{"label": "Status", "fieldname": "status", "width": 100},
+		{"label": "In Time", "fieldname": "in_time", "fieldtype": "Time", "width": 160},
+		{"label": "Out Time", "fieldname": "out_time", "fieldtype": "Time", "width": 160},
+		{"label": "Working Hours", "fieldname": "working_hours", "fieldtype": "Float", "width": 120},
+		{"label": "Actual Working Hours", "fieldname": "actual_working_hours", "fieldtype": "Float", "width": 120},
+		{"label": "OT Hours", "fieldname": "ot_hours", "fieldtype": "Float", "width": 100},
+		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
+		{"label": "Early Exit", "fieldname": "early_exit", "fieldtype": "Check", "width": 100},
+		{"label": "Remarks", "fieldname": "remarks", "width": 150},
+	]
+
+def get_data(filters):
+	conditions = ""
+
+	if filters.get("company"):
+		conditions += " AND att.company = %(company)s"
+
+	if filters.get("department"):
+		conditions += " AND emp.department = %(department)s"
+
+	data = frappe.db.sql(f"""
+		SELECT
+			att.attendance_date,
+			att.employee,
+			emp.employee_name,
+			att.shift,
+			att.status,
+			att.in_time,
+			att.out_time,
+			att.working_hours,
+			att.late_entry,
+			att.early_exit
+		FROM `tabAttendance` att
+		JOIN `tabEmployee` emp ON emp.name = att.employee
+		WHERE att.attendance_date 
+			BETWEEN %(from_date)s AND %(to_date)s
+		{conditions}
+		ORDER BY att.attendance_date, emp.employee_name
+	""", filters, as_dict=1)
+
+	for row in data:
+
+		if row.working_hours and row.status == "Present":
+			if row.working_hours >= (BREAK_HOURS + SHIFT_WORKING_HOURS):
+				row.actual_working_hours = round(row.working_hours - BREAK_HOURS, 2)
+			else:
+				row.actual_working_hours = row.working_hours
+		else:
+			row.actual_working_hours = row.working_hours or 0
+
+		if row.actual_working_hours > SHIFT_WORKING_HOURS:
+			row.ot_hours = round(row.actual_working_hours - SHIFT_WORKING_HOURS, 2)
+		else:
+			row.ot_hours = 0
+
+		row.remarks = generate_remarks(row)
+
+		if row.in_time:
+			row.in_time = get_datetime(row.in_time).time()
+
+		if row.out_time:
+			row.out_time = get_datetime(row.out_time).time()
+
+	return data
+
+def calculate_ot(row, report_date):
+	if not row.out_time or not row.shift:
+		return 0
+
+	shift_end = frappe.db.get_value("Shift Type", row.shift, "end_time")
+	if not shift_end:
+		return 0
+
+	shift_end_datetime = get_datetime(f"{report_date} {shift_end}")
+	out_time = get_datetime(row.out_time)
+
+	if out_time > shift_end_datetime:
+		return round(time_diff_in_hours(out_time, shift_end_datetime), 2)
+
+	return 0
+
+def generate_remarks(row):
+	remarks = []
+
+	if row.status == "Absent":
+		remarks.append("A")
+
+	if row.status == "Half Day":
+		remarks.append("HD")
+
+	if row.late_entry:
+		remarks.append("LT")
+
+	if row.early_exit:
+		remarks.append("EI")
+
+	if row.ot_hours and row.ot_hours > 0:
+		remarks.append("OT")
+
+	return "-".join(remarks) if remarks else ""
+
+def get_summary(data):
+	total_present = len([d for d in data if d.status == "Present"])
+	total_absent = len([d for d in data if d.status == "Absent"])
+	total_half_day = len([d for d in data if d.status == "Half Day"])
+	total_late = len([d for d in data if d.late_entry])
+	total_early_exit = len([d for d in data if d.early_exit])
+
+	return [
+		{"label": "Present", "value": total_present, "indicator": "Green"},
+		{"label": "Absent", "value": total_absent, "indicator": "Red"},
+		{"label": "Half Day", "value": total_half_day, "indicator": "Orange"},
+		{"label": "Late Entry", "value": total_late, "indicator": "Dark Blue"},
+		{"label": "Early Exit", "value": total_early_exit, "indicator": "Light Blue"},
+	]
