@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import get_datetime, time_diff_in_hours
+from frappe.utils import get_datetime
 
 def execute(filters=None):
 	columns = get_columns()
@@ -21,14 +21,22 @@ def get_columns():
 		{"label": "Status", "fieldname": "status", "width": 100},
 		{"label": "In Time", "fieldname": "in_time", "fieldtype": "Time", "width": 160},
 		{"label": "Out Time", "fieldname": "out_time", "fieldtype": "Time", "width": 160},
-		{"label": "Working Hours", "fieldname": "working_hours", "fieldtype": "Float", "width": 120},
-		{"label": "Break Hours", "fieldname": "break_hours", "fieldtype": "Float", "width": 110},
-		{"label": "Actual Working Hours", "fieldname": "actual_working_hours", "fieldtype": "Float", "width": 120},
-		{"label": "OT Hours", "fieldname": "ot_hours", "fieldtype": "Float", "width": 100},
-		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
+		{"label": "Working Hours", "fieldname": "working_time", "fieldtype": "Data", "width": 120},
+		{"label": "Break Hours", "fieldname": "break_time", "fieldtype": "Data", "width": 110},
+		{"label": "Actual Working Hours", "fieldname": "actual_working_time", "fieldtype": "Data", "width": 140},
+		{"label": "OT Hours", "fieldname": "ot_time", "fieldtype": "Data", "width": 100},		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
 		{"label": "Early Exit", "fieldname": "early_exit", "fieldtype": "Check", "width": 100},
 		{"label": "Remarks", "fieldname": "remarks", "width": 150},
 	]
+
+def decimal_to_time(decimal_hours):
+	if not decimal_hours:
+		return "00:00"
+
+	hours = int(decimal_hours)
+	minutes = int(round((decimal_hours - hours) * 60))
+
+	return f"{hours:02d}:{minutes:02d}"
 
 def get_data(filters):
 	conditions = ""
@@ -91,6 +99,12 @@ def get_data(filters):
 			row.ot_hours = round(row.actual_working_hours - std_hours, 2)
 		else:
 			row.ot_hours = 0
+
+		# Time Formatting
+		row.working_time = decimal_to_time(row.working_hours)
+		row.actual_working_time = decimal_to_time(row.actual_working_hours)
+		row.ot_time = decimal_to_time(row.ot_hours)
+		row.break_time = decimal_to_time(row.break_hours)
 
 		row.remarks = generate_remarks(row)
 
