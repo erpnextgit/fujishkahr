@@ -4,9 +4,6 @@
 import frappe
 from frappe.utils import get_datetime, time_diff_in_hours
 
-BREAK_HOURS = 1
-SHIFT_WORKING_HOURS = 8
-
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
@@ -25,6 +22,7 @@ def get_columns():
 		{"label": "In Time", "fieldname": "in_time", "fieldtype": "Time", "width": 160},
 		{"label": "Out Time", "fieldname": "out_time", "fieldtype": "Time", "width": 160},
 		{"label": "Working Hours", "fieldname": "working_hours", "fieldtype": "Float", "width": 120},
+		{"label": "Break Hours", "fieldname": "break_hours", "fieldtype": "Float", "width": 110},
 		{"label": "Actual Working Hours", "fieldname": "actual_working_hours", "fieldtype": "Float", "width": 120},
 		{"label": "OT Hours", "fieldname": "ot_hours", "fieldtype": "Float", "width": 100},
 		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
@@ -63,16 +61,34 @@ def get_data(filters):
 
 	for row in data:
 
+		shift_config = frappe.db.get_value(
+			"Shift Type",
+			row.shift,
+			["std_working_hours", "allow_break_time", "break_hours"],
+			as_dict=1
+		) if row.shift else None
+
+		std_hours = shift_config.std_working_hours if shift_config and shift_config.std_working_hours else 0
+		allow_break = shift_config.allow_break_time if shift_config else 0
+		break_hours = shift_config.break_hours if shift_config and shift_config.break_hours else 0
+		row.break_hours = break_hours if allow_break else 0
+
+		# Actual Working Hours Calculation
 		if row.working_hours and row.status == "Present":
-			if row.working_hours >= (BREAK_HOURS + SHIFT_WORKING_HOURS):
-				row.actual_working_hours = round(row.working_hours - BREAK_HOURS, 2)
+
+			if allow_break and break_hours:
+				row.actual_working_hours = round(
+					max(row.working_hours - break_hours, 0), 2
+				)
 			else:
 				row.actual_working_hours = row.working_hours
+
 		else:
 			row.actual_working_hours = row.working_hours or 0
 
-		if row.actual_working_hours > SHIFT_WORKING_HOURS:
-			row.ot_hours = round(row.actual_working_hours - SHIFT_WORKING_HOURS, 2)
+		# OT Calculation
+		if std_hours and row.actual_working_hours > std_hours:
+			row.ot_hours = round(row.actual_working_hours - std_hours, 2)
 		else:
 			row.ot_hours = 0
 
@@ -85,22 +101,6 @@ def get_data(filters):
 			row.out_time = get_datetime(row.out_time).time()
 
 	return data
-
-def calculate_ot(row, report_date):
-	if not row.out_time or not row.shift:
-		return 0
-
-	shift_end = frappe.db.get_value("Shift Type", row.shift, "end_time")
-	if not shift_end:
-		return 0
-
-	shift_end_datetime = get_datetime(f"{report_date} {shift_end}")
-	out_time = get_datetime(row.out_time)
-
-	if out_time > shift_end_datetime:
-		return round(time_diff_in_hours(out_time, shift_end_datetime), 2)
-
-	return 0
 
 def generate_remarks(row):
 	remarks = []
