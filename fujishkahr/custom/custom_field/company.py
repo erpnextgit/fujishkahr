@@ -9,7 +9,6 @@ def get_company_custom_fields():
 				"label": "Company Code",
 				"fieldname": "company_code",
 				"insert_after": "parent_company",
-				"reqd": 1,
 				"unique": 1,
 			},
 		]
