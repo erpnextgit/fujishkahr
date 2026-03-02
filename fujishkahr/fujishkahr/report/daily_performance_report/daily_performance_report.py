@@ -24,7 +24,8 @@ def get_columns():
 		{"label": "Working Hours", "fieldname": "working_time", "fieldtype": "Data", "width": 120},
 		{"label": "Break Hours", "fieldname": "break_time", "fieldtype": "Data", "width": 110},
 		{"label": "Actual Working Hours", "fieldname": "actual_working_time", "fieldtype": "Data", "width": 140},
-		{"label": "OT Hours", "fieldname": "ot_time", "fieldtype": "Data", "width": 100},		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
+		{"label": "OT Hours", "fieldname": "ot_time", "fieldtype": "Data", "width": 100},
+		{"label": "Late Entry", "fieldname": "late_entry", "fieldtype": "Check", "width": 100},
 		{"label": "Early Exit", "fieldname": "early_exit", "fieldtype": "Check", "width": 100},
 		{"label": "Remarks", "fieldname": "remarks", "width": 150},
 	]
@@ -67,14 +68,20 @@ def get_data(filters):
 		ORDER BY att.attendance_date, emp.employee_name
 	""", filters, as_dict=1)
 
+	shift_names = list(set([d.shift for d in data if d.shift]))
+	shift_map = {}
+
+	if shift_names:
+		shift_configs = frappe.get_all(
+			"Shift Type",
+			filters={"name": ["in", shift_names]},
+			fields=["name", "std_working_hours", "allow_break_time", "break_hours"]
+		)
+		shift_map = {d.name: d for d in shift_configs}
+
 	for row in data:
 
-		shift_config = frappe.db.get_value(
-			"Shift Type",
-			row.shift,
-			["std_working_hours", "allow_break_time", "break_hours"],
-			as_dict=1
-		) if row.shift else None
+		shift_config = shift_map.get(row.shift)
 
 		std_hours = shift_config.std_working_hours if shift_config and shift_config.std_working_hours else 0
 		allow_break = shift_config.allow_break_time if shift_config else 0
@@ -83,14 +90,12 @@ def get_data(filters):
 
 		# Actual Working Hours Calculation
 		if row.working_hours and row.status == "Present":
-
 			if allow_break and break_hours:
 				row.actual_working_hours = round(
 					max(row.working_hours - break_hours, 0), 2
 				)
 			else:
 				row.actual_working_hours = row.working_hours
-
 		else:
 			row.actual_working_hours = row.working_hours or 0
 
