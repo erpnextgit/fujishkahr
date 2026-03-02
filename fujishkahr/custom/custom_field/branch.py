@@ -9,7 +9,6 @@ def get_branch_custom_fields():
 				"label": "Branch Code",
 				"fieldname": "branch_code",
 				"insert_after": "branch",
-				"reqd": 1,
 				"unique": 1,
 			},
 		]
