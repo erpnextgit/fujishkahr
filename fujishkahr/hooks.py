@@ -29,8 +29,8 @@ app_include_css = [
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fujishkahr/css/fujishkahr.css"
 app_include_js = [
-    "/assets/fujishkahr/js/language_switcher.js",
-    "/assets/fujishkahr/js/attendance_heatmap.js",
+	"/assets/fujishkahr/js/language_switcher.js",
+	"/assets/fujishkahr/js/attendance_heatmap.js",
 ]
 
 # include js, css files in header of web template
@@ -153,13 +153,11 @@ before_uninstall = "fujishkahr.install.before_uninstall"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Employee Checkin": {
+		"validate": "fujishkahr.fujishkahr.custom_scripts.employee_checkin.employee_checkin.check_late_entry",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
