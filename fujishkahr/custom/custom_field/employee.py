@@ -9,6 +9,7 @@ def get_employee_custom_fields():
 				"label": "Probation",
 				"fieldname": "sb_probation",
 				"insert_after": "grade",
+				"depends_on": "eval:doc.is_probation==1",
 			},
 			{
 				"fieldname": "probation_start_date",
@@ -55,6 +56,14 @@ def get_employee_custom_fields():
 				"label": "Attendance Heatmap",
 				"insert_after": "sb_attendance_summary",
 				"depends_on": "eval: !doc.__islocal",
+			},
+			{
+				"fieldname": "is_probation",
+				"fieldtype": "Check",
+				"label": "Is Probation",
+				"insert_after": "employment_type",
+				"hidden": 1,
+				"fetch_from": "employment_type.is_probation",
 			},
 		]
 	}
