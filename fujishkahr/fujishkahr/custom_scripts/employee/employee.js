@@ -27,6 +27,9 @@ frappe.ui.form.on("Employee", {
 	probation_end_date: function(frm) {
 		validate_probation_dates(frm);
 	},
+	employment_type: function(frm) {
+		validate_probation_dates(frm);
+	},
 	company: function(frm) {
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
