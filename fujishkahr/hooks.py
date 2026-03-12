@@ -166,9 +166,12 @@ doc_events = {
 # 	"all": [
 # 		"fujishkahr.tasks.all"
 # 	],
-# 	"daily": [
-# 		"fujishkahr.tasks.daily"
-# 	],
+scheduler_events = {
+	"daily": [
+		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
+	],
+}
+
 # 	"hourly": [
 # 		"fujishkahr.tasks.hourly"
 # 	],
