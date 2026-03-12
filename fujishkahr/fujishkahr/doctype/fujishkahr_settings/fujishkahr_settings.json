@@ -8,7 +8,9 @@
   "timesheet_settings_section",
   "hide_currency_fields",
   "probation_period_settings_section",
-  "default_probation_period"
+  "default_probation_period",
+  "notify_probation_end_date_before",
+  "probation_end_date_notification"
  ],
  "fields": [
   {
@@ -34,13 +36,25 @@
    "fieldname": "probation_period_settings_section",
    "fieldtype": "Section Break",
    "label": "Probation Period Settings"
+  },
+  {
+   "fieldname": "notify_probation_end_date_before",
+   "fieldtype": "Int",
+   "label": "Notify Probation End Date Before",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "probation_end_date_notification",
+   "fieldtype": "Link",
+   "label": "Probation End Date Notification Template",
+   "options": "Email Template"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-05 15:47:16.197148",
+ "modified": "2026-03-11 17:07:00.170171",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Fujishkahr Settings",
