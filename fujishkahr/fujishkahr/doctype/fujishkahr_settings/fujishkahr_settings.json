@@ -10,7 +10,10 @@
   "probation_period_settings_section",
   "default_probation_period",
   "notify_probation_end_date_before",
-  "probation_end_date_notification"
+  "probation_end_date_notification",
+  "payroll_settings_section",
+  "enable_fixed_payroll_days",
+  "fixed_working_days"
  ],
  "fields": [
   {
@@ -48,13 +51,31 @@
    "fieldtype": "Link",
    "label": "Probation End Date Notification Template",
    "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_fixed_payroll_days",
+   "fieldtype": "Check",
+   "label": "Enable Fixed Payroll Days"
+  },
+  {
+   "depends_on": "eval:doc.enable_fixed_payroll_days;",
+   "fieldname": "fixed_working_days",
+   "fieldtype": "Int",
+   "label": "Fixed Working Days"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payroll_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Payroll Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-11 17:07:00.170171",
+ "modified": "2026-03-18 09:53:57.752416",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Fujishkahr Settings",

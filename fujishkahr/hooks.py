@@ -157,6 +157,9 @@ doc_events = {
 	"Employee Checkin": {
 		"validate": "fujishkahr.fujishkahr.custom_scripts.employee_checkin.employee_checkin.check_late_entry",
 	},
+	"Salary Slip": {
+		"validate": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
+	},
 }
 
 # Scheduled Tasks
