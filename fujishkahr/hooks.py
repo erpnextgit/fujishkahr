@@ -159,6 +159,7 @@ doc_events = {
 	},
 	"Salary Slip": {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
+		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days"
 	},
 }
 
