@@ -194,9 +194,9 @@ scheduler_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "fujishkahr.event.get_events"
-# }
+override_whitelisted_methods = {
+	"fujishkahr.api.api.fb_webhook": "fujishkahr.api.api.fb_webhook"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
