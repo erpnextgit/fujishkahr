@@ -12,7 +12,7 @@ def get_default_probation_period():
 	Return default probation period in days from Fujishkahr Settings.
 	"""
 	period = frappe.db.get_single_value("Fujishkahr Settings", "default_probation_period")
-	return int(period)
+	return int(period) if period else 0
 
 def notify_hr_probation():
 	"""
