@@ -13,6 +13,12 @@ frappe.ui.form.on("Employee", {
 			employee: frm.doc.name,
 			year: new Date().getFullYear()
 		});
+		filter_reports_to_company(frm);
+		filter_holiday_list(frm);
+	},
+	onload: function(frm) {
+		filter_reports_to_company(frm);
+		filter_holiday_list(frm);
 	},
 	validate(frm) {
 		validate_probation_dates(frm);
