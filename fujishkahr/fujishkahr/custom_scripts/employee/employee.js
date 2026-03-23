@@ -28,6 +28,7 @@ frappe.ui.form.on("Employee", {
 		validate_probation_dates(frm);
 	},
 	employment_type: function(frm) {
+		set_probation_dates(frm);
 		validate_probation_dates(frm);
 	},
 	company: function(frm) {
@@ -41,14 +42,21 @@ frappe.ui.form.on("Employee", {
  * based on date of joining and default probation period from settings
  */
 function set_probation_dates(frm) {
-	let start_date = frm.doc.probation_start_date || frm.doc.date_of_joining;
-	if(!start_date) return;
-
-	if(!frm.doc.probation_start_date) {
-		frm.set_value("probation_start_date", start_date);
+	if (!frm.doc.is_probation) {
+		frm.set_value('probation_start_date', null);
+		frm.set_value('probation_end_date', null);
+		return;
 	}
 
-	if(!frm.doc.probation_end_date) {
+	let start_date = frm.doc.probation_start_date || frm.doc.date_of_joining;
+
+	if (!start_date) return;
+
+	if (!frm.doc.probation_start_date) {
+		frm.set_value('probation_start_date', start_date);
+	}
+
+	if (!frm.doc.probation_end_date) {
 		frappe.call({
 			method: "fujishkahr.fujishkahr.custom_scripts.employee.employee.get_default_probation_period",
 			callback: function(r) {

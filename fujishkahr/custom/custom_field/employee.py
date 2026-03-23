@@ -9,13 +9,14 @@ def get_employee_custom_fields():
 				"label": "Probation",
 				"fieldname": "sb_probation",
 				"insert_after": "grade",
-				"depends_on": "eval:doc.is_probation==1",
+				"depends_on": "eval:doc.is_probation",
 			},
 			{
 				"fieldname": "probation_start_date",
 				"fieldtype": "Date",
 				"label": "Probation Start Date",
 				"insert_after": "sb_probation",
+				"depends_on": "eval:doc.is_probation",
 			},
 			{
 				"fieldtype": "Column Break",
@@ -27,6 +28,7 @@ def get_employee_custom_fields():
 				"fieldtype": "Date",
 				"label": "Probation End Date",
 				"insert_after": "cb_probation",
+				"depends_on": "eval:doc.is_probation",
 			},
 			{
 				"fieldtype": "Section Break",
@@ -55,7 +57,7 @@ def get_employee_custom_fields():
 				"fieldtype": "HTML",
 				"label": "Attendance Heatmap",
 				"insert_after": "sb_attendance_summary",
-				"depends_on": "eval: !doc.__islocal",
+				"depends_on": "eval:!doc.__islocal",
 			},
 			{
 				"fieldname": "is_probation",
