@@ -121,6 +121,7 @@
    "fetch_from": "company.default_employee_advance_account",
    "fieldname": "advance_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Advance Account",
    "options": "Account",
    "read_only": 1
@@ -130,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:26:18.466200",
+ "modified": "2026-03-30 13:26:22.953710",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",
