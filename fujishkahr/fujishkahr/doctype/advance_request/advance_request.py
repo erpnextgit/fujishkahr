@@ -99,7 +99,7 @@ class AdvanceRequest(Document):
 				</table>
 
 				<br>
-				<p>The advance amount will be processed shortly.</p>
+				<p>The advance amount will be processed on {self.payment_credit_date}.</p>
 
 				<p>Regards,<br>HR Team</p>
 			""",
