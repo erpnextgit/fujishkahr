@@ -115,9 +115,9 @@
    "allow_on_submit": 1,
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Status",
-   "options": "\nDraft\nPending HR\nPending CEO\nApproved by HR\nRejected by HR\nApproved\nVerified\nRejected\nPayment Initiated",
-   "read_only": 1
+   "options": "\nDraft\nPending HR\nPending CEO\nApproved by HR\nRejected by HR\nApproved\nRejected\nPayment Initiated"
   },
   {
    "fetch_from": "company.default_employee_advance_account",
@@ -139,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 13:58:24.206103",
+ "modified": "2026-03-31 16:16:24.921724",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",
