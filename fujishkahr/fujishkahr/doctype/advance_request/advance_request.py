@@ -4,6 +4,8 @@
 import frappe
 from frappe.model.document import Document
 from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import add_months, getdate
+import json
 
 class AdvanceRequest(Document):
 
@@ -105,3 +107,65 @@ class AdvanceRequest(Document):
 			""",
 			now=True
 		)
+
+@frappe.whitelist()
+def create_additional_salary(docname, data):
+	"""
+		Creates Additional Salary records for an Advance Request
+		based on the provided data.
+	"""
+	data = frappe._dict(json.loads(data))
+	doc = frappe.get_doc("Advance Request", docname)
+
+	if data.is_installment:
+		monthly = data.advance_amount / data.months
+
+		for i in range(int(data.months)):
+			salary_date = add_months(getdate(data.start_month), i)
+
+			if frappe.db.exists("Additional Salary", {
+				"ref_doctype": "Advance Request",
+				"ref_docname": docname
+			}):
+				frappe.throw("Additional Salary already created for this Advance Request")
+				return
+
+			create_salary(
+				doc.employee,
+				data.salary_component,
+				monthly,
+				salary_date,
+				doc.name,
+				doc.company,
+			)
+
+	elif data.deduct_full:
+		if frappe.db.exists("Additional Salary", {
+			"ref_doctype": "Advance Request",
+			"ref_docname": docname
+		}):
+			frappe.throw("Additional Salary already created for this Advance Request")
+			return
+
+		create_salary(
+			doc.employee,
+			data.salary_component,
+			data.advance_amount,
+			getdate(data.deduction_month),
+			doc.name,
+			doc.company
+		)
+
+def create_salary(employee, component, amount, date, ref_name, company):
+	"""
+		Helper function to create an Additional Salary record.
+	"""
+	doc = frappe.new_doc("Additional Salary")
+	doc.employee = employee
+	doc.company = company
+	doc.salary_component = component
+	doc.amount = round(amount, 2)
+	doc.payroll_date = date
+	doc.ref_doctype = "Advance Request"
+	doc.ref_docname = ref_name
+	doc.insert()
