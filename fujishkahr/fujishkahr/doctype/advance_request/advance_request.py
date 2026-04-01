@@ -117,18 +117,17 @@ def create_additional_salary(docname, data):
 	data = frappe._dict(json.loads(data))
 	doc = frappe.get_doc("Advance Request", docname)
 
+	if frappe.db.exists("Additional Salary", {
+		"ref_doctype": "Advance Request",
+		"ref_docname": docname
+	}):
+		frappe.throw("Additional Salary already created for this Advance Request")
+
 	if data.is_installment:
 		monthly = data.advance_amount / data.months
 
 		for i in range(int(data.months)):
 			salary_date = add_months(getdate(data.start_month), i)
-
-			if frappe.db.exists("Additional Salary", {
-				"ref_doctype": "Advance Request",
-				"ref_docname": docname
-			}):
-				frappe.throw("Additional Salary already created for this Advance Request")
-				return
 
 			create_salary(
 				doc.employee,
@@ -140,13 +139,6 @@ def create_additional_salary(docname, data):
 			)
 
 	elif data.deduct_full:
-		if frappe.db.exists("Additional Salary", {
-			"ref_doctype": "Advance Request",
-			"ref_docname": docname
-		}):
-			frappe.throw("Additional Salary already created for this Advance Request")
-			return
-
 		create_salary(
 			doc.employee,
 			data.salary_component,
