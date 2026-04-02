@@ -59,6 +59,13 @@ function create_additional_salary(frm) {
 						fieldtype: 'Link',
 						options: 'Salary Component',
 						reqd: 1,
+						get_query() {
+							return {
+								filters: {
+									"type": "Deduction"
+								}
+							};
+						}
 					},
 					{
 						fieldtype: 'Section Break'
