@@ -45,6 +45,7 @@ class AdvanceRequest(Document):
 		advance.currency = account_currency
 		advance.exchange_rate = exchange_rate
 		advance.repay_unclaimed_amount_from_salary = 1
+		advance.advance_request = self.name
 
 		advance.insert(ignore_permissions=True)
 		advance.submit()
@@ -118,10 +119,18 @@ def create_additional_salary(docname, data):
 	doc = frappe.get_doc("Advance Request", docname)
 
 	if frappe.db.exists("Additional Salary", {
-		"ref_doctype": "Advance Request",
-		"ref_docname": docname
+		"advance_request": docname
 	}):
 		frappe.throw("Additional Salary already created for this Advance Request")
+
+	employee_advance = frappe.db.get_value(
+		"Employee Advance",
+		{"advance_request": docname},
+		"name"
+	)
+
+	if not employee_advance:
+		frappe.throw("Employee Advance not found")
 
 	if data.is_installment:
 		monthly = data.advance_amount / data.months
@@ -134,8 +143,9 @@ def create_additional_salary(docname, data):
 				data.salary_component,
 				monthly,
 				salary_date,
-				doc.name,
+				employee_advance,
 				doc.company,
+				docname
 			)
 
 	elif data.deduct_full:
@@ -144,11 +154,12 @@ def create_additional_salary(docname, data):
 			data.salary_component,
 			data.advance_amount,
 			getdate(data.deduction_month),
-			doc.name,
-			doc.company
+			employee_advance,
+			doc.company,
+			docname
 		)
 
-def create_salary(employee, component, amount, date, ref_name, company):
+def create_salary(employee, component, amount, date, advance_name, company, advance_request):
 	"""
 		Helper function to create an Additional Salary record.
 	"""
@@ -158,6 +169,7 @@ def create_salary(employee, component, amount, date, ref_name, company):
 	doc.salary_component = component
 	doc.amount = round(amount, 2)
 	doc.payroll_date = date
-	doc.ref_doctype = "Advance Request"
-	doc.ref_docname = ref_name
+	doc.ref_doctype = "Employee Advance"
+	doc.ref_docname = advance_name
+	doc.advance_request = advance_request
 	doc.insert()
