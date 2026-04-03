@@ -36,7 +36,7 @@ h1,h2,h3,h4,h5,h6 { color: var(--txt) !important; }
 
 /* Navbar dropdown */
 header.navbar .dropdown-menu {
-  background-color: #dfeedd87 !important;  /*dropdown bg with slight opacity background-color*/
+  background-color: #fafbfa !important;
   border: 1px solid var(--navy-3) !important;
   border-radius: 10px !important;
   padding: 5px !important;
