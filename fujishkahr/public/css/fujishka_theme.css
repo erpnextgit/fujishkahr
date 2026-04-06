@@ -66,12 +66,14 @@ header.navbar .dropdown-menu .dropdown-divider {
   box-shadow: 0 8px 24px rgba(0,0,0,.25) !important;
 }
 .awesomplete li {
-  color: rgba(255,255,255,.82) !important;
+  color: var(--txt) !important;
   border-radius: 6px !important;
   padding: 8px 12px !important;
   background: transparent !important;
 }
-.awesomplete li span { color: #3a3d46 !important; }
+.awesomplete li span {
+  color: var(--txt) !important;
+}
 .awesomplete li:hover,
 .awesomplete li[aria-selected="true"] {
   background-color: rgba(255,255,255,.08) !important;
