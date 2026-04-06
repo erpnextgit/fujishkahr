@@ -51,7 +51,7 @@ class AdvanceRequest(Document):
 		advance.submit()
 
 		frappe.msgprint(
-			f"Employee Advance <b>{advance.name}</b> created and submitted successfully.",
+			f"Employee Advance <a href='/app/employee-advance/{advance.name}'><b>{advance.name}</b></a> created and submitted successfully.",
 			alert=True
 		)
 
@@ -133,6 +133,11 @@ def create_additional_salary(docname, data):
 		frappe.throw("Employee Advance not found")
 
 	if data.is_installment:
+		if not data.months or data.months <= 0:
+			frappe.throw("Number of Months must be greater than 0 for installment")
+		if not data.start_month:
+			frappe.throw("Start Month is required for installment")
+
 		monthly = data.advance_amount / data.months
 
 		for i in range(int(data.months)):
@@ -149,6 +154,9 @@ def create_additional_salary(docname, data):
 			)
 
 	elif data.deduct_full:
+		if not data.deduction_month:
+			frappe.throw("Deduction Month is required when 'Deduct Full Amount' is selected")
+
 		create_salary(
 			doc.employee,
 			data.salary_component,
