@@ -123,7 +123,17 @@ function create_additional_salary(frm) {
 							data: values
 						},
 						callback: function(r) {
-							frappe.msgprint("Additional Salary Created");
+							if (r.message) {
+								let links = r.message.map(name => {
+									return `<a href="/app/additional-salary/${name}" target="_blank">${name}</a>`;
+								}).join("<br>");
+
+								frappe.msgprint({
+									title: "Success",
+									message: `Additional Salary Created:<br>${links}`,
+									indicator: "green"
+								});
+							}
 							d.hide();
 						}
 					});
