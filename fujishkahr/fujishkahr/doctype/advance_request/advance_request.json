@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:ADV-REQ-{YY}-{####}",
+ "autoname": "format:{employee_name}-{####}",
  "creation": "2026-03-28 12:14:54.103235",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -139,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 16:16:24.921724",
+ "modified": "2026-04-07 12:36:53.689490",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",
