@@ -1,0 +1,135 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"Yl8gBEy3hn\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Payruns</span>\",\"col\":12}},{\"id\":\"a9sUWyJEEL\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Quick entry</span>\",\"col\":12}},{\"id\":\"CmLAcUJYNq\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payroll Entry\",\"col\":3}},{\"id\":\"DGYkjH9Azt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Slip\",\"col\":3}},{\"id\":\"ezOexGa08Z\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Advance Request\",\"col\":3}},{\"id\":\"k0vfJ3Yic9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Advance\",\"col\":3}},{\"id\":\"6PboOuP2Cb\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"Azmz8E7B_q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"dcKNnNseJ1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Claim\",\"col\":3}},{\"id\":\"saIR2RBmpr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Additional Salary\",\"col\":3}},{\"id\":\"FxEo8rfx_Y\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Overview</span>\",\"col\":12}},{\"id\":\"mvflRfPFm4\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Create Salary Slip from Payroll\",\"col\":4}},{\"id\":\"iwLNVUNl08\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Submit Salary Slip from Payroll\",\"col\":4}},{\"id\":\"WOBxjFplrW\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Make Bank Entry from Payroll\",\"col\":4}},{\"id\":\"44iMNnPpnk\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Adv-Req Pending Hr Approvel\",\"col\":4}},{\"id\":\"nHZAELjGYY\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Adv-Req Pending CEO Approvel\",\"col\":4}},{\"id\":\"c8ZowS453t\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Pending Advance Payment\",\"col\":4}},{\"id\":\"_KWIE9xBnD\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">History&nbsp;</span>\",\"col\":12}},{\"id\":\"08QcEWeqMW\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"History of Payroll Entry\",\"col\":6}},{\"id\":\"JEq7jySVjr\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"History of Advance Request\",\"col\":6}}]",
+ "creation": "2026-04-06 12:53:30.727175",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "expenses",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Payruns",
+ "links": [],
+ "modified": "2026-04-08 15:25:37.259420",
+ "modified_by": "Administrator",
+ "module": "Fujishkahr",
+ "name": "Payruns",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Payroll Entry",
+   "label": "Submit Salary Slip from Payroll",
+   "quick_list_filter": "[[\"Payroll Entry\",\"salary_slips_created\",\"=\",1,false],[\"Payroll Entry\",\"salary_slips_submitted\",\"=\",0,false]]"
+  },
+  {
+   "document_type": "Payroll Entry",
+   "label": "Make Bank Entry from Payroll",
+   "quick_list_filter": "[[\"Payroll Entry\",\"status\",\"=\",\"Submitted\",false],[\"Payroll Entry\",\"salary_slips_submitted\",\"=\",1,false]]"
+  },
+  {
+   "document_type": "Advance Request",
+   "label": "Adv-Req Pending Hr Approvel",
+   "quick_list_filter": "[[\"Advance Request\",\"workflow_state\",\"=\",\"Pending HR Approvel\",false]]"
+  },
+  {
+   "document_type": "Payroll Entry",
+   "label": "History of Payroll Entry",
+   "quick_list_filter": "[[\"Payroll Entry\",\"status\",\"=\",\"Submitted\",false]]"
+  },
+  {
+   "document_type": "Advance Request",
+   "label": "Adv-Req Pending CEO Approvel",
+   "quick_list_filter": "[[\"Advance Request\",\"workflow_state\",\"=\",\"Forward to CEO\",false]]"
+  },
+  {
+   "document_type": "Payroll Entry",
+   "label": "Create Salary Slip from Payroll",
+   "quick_list_filter": "[[\"Payroll Entry\",\"status\",\"=\",\"Draft\",false]]"
+  },
+  {
+   "document_type": "Advance Request",
+   "label": "History of Advance Request",
+   "quick_list_filter": "[[\"Advance Request\",\"workflow_state\",\"=\",\"Paid\",false],[\"Advance Request\",\"status\",\"=\",\"Paid\",false]]"
+  },
+  {
+   "document_type": "Advance Request",
+   "label": "Pending Advance Payment",
+   "quick_list_filter": "[[\"Advance Request\",\"workflow_state\",\"=\",\"Initiate Payment\",false]]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 41.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Payroll Entry",
+   "link_to": "Payroll Entry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Salary Slip",
+   "link_to": "Salary Slip",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Advance Request",
+   "link_to": "Advance Request",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Employee Advance",
+   "link_to": "Employee Advance",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Journal Entry",
+   "link_to": "Journal Entry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Expense Claim",
+   "link_to": "Expense Claim",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "Additional Salary",
+   "link_to": "Additional Salary",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Payruns"
+}
