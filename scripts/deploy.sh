@@ -5,6 +5,7 @@ echo "🔧 Setting environment..."
 export PATH=$PATH:/home/frappe/.local/bin
 
 # Variables
+#var
 SITE="hr-uat.fujishkaerp.com"
 BENCH_DIR="/home/frappe/fujishka-bench"
 RELEASES_DIR="/home/frappe/releases"
