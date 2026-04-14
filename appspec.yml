@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/frappe/deploy_tmp
+
+hooks:
+  AfterInstall:
+    - location: scripts/deploy.sh
+      timeout: 900
+      runas: frappe
+
+  ApplicationStart:
+    - location: scripts/cleanup.sh
+      timeout: 300
+      runas: frappe
+
+  ValidateService:
+    - location: scripts/rollback.sh
+      timeout: 300
+      runas: frappe
