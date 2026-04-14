@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+source /home/frappe/.bashrc
+export PATH=$PATH:/home/frappe/.local/bin
+
 echo "🚀 Starting deployment..."
 
 APP_DIR="/home/frappe/fujishka-bench"
