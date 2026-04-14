@@ -5,7 +5,7 @@ echo "🔧 Setting environment..."
 export PATH=$PATH:/home/frappe/.local/bin
 
 # Variables
-SITE="hr.fujishkaerp.com"
+SITE="hr-uat.fujishkaerp.com"
 BENCH_DIR="/home/frappe/fujishka-bench"
 RELEASES_DIR="/home/frappe/releases"
 BACKUP_DIR="/home/frappe/backups"
@@ -26,11 +26,11 @@ cp -r $DEPLOY_TMP/* $RELEASE_DIR/
 
 echo "💾 Taking backup..."
 mkdir -p $BACKUP_DIR
-bench --site $SITE backup --with-files
+bench --site $SITE backup --with-files || echo "⚠️ Backup failed, continuing..."
 
-echo "🔁 Linking new release..."
+echo "🔁 Updating custom app..."
 
-# Optional: replace only custom app (recommended)
+# Replace only your custom app
 rm -rf $BENCH_DIR/apps/fujishkahr
 cp -r $RELEASE_DIR/fujishkahr $BENCH_DIR/apps/
 
