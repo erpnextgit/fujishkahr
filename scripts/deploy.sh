@@ -1,33 +1,57 @@
 #!/bin/bash
 set -e
 
-source /home/frappe/.bashrc
+echo "🔧 Setting environment..."
 export PATH=$PATH:/home/frappe/.local/bin
+
+# Variables
+SITE="hr.fujishkaerp.com"
+BENCH_DIR="/home/frappe/fujishka-bench"
+RELEASES_DIR="/home/frappe/releases"
+BACKUP_DIR="/home/frappe/backups"
+DEPLOY_TMP="/home/frappe/deploy_tmp"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+RELEASE_DIR="$RELEASES_DIR/release_$TIMESTAMP"
 
 echo "🚀 Starting deployment..."
 
-APP_DIR="/home/frappe/fujishka-bench"
-RELEASE_DIR="/home/frappe/releases/release_$(date +%Y%m%d%H%M%S)"
+# Go to bench
+cd $BENCH_DIR
 
+echo "📦 Creating release folder..."
 mkdir -p $RELEASE_DIR
 
-echo "📦 Copying app..."
-cp -r /home/frappe/deploy_tmp/fujishkahr $RELEASE_DIR/
+echo "📦 Copying new code from artifact..."
+cp -r $DEPLOY_TMP/* $RELEASE_DIR/
 
-echo "💾 Backup..."
-cd $APP_DIR
-bench --site hr.fujishkaerp.com backup
+echo "💾 Taking backup..."
+mkdir -p $BACKUP_DIR
+bench --site $SITE backup --with-files
 
-echo "⬇️ Updating app..."
-bench get-app $RELEASE_DIR/fujishkahr --overwrite
+echo "🔁 Linking new release..."
 
-echo "🔄 Migrate..."
-bench --site hr.fujishkaerp.com migrate
+# Optional: replace only custom app (recommended)
+rm -rf $BENCH_DIR/apps/fujishkahr
+cp -r $RELEASE_DIR/fujishkahr $BENCH_DIR/apps/
 
-echo "🏗️ Build..."
+echo "⚙️ Running migrations..."
+bench --site $SITE migrate
+
+echo "🎨 Building assets..."
 bench build
 
-echo "🔁 Restart..."
+echo "🧹 Clearing cache..."
+bench --site $SITE clear-cache
+
+echo "🔄 Restarting services..."
 bench restart
 
-echo "✅ Deployment done"
+echo "🧹 Cleaning old releases..."
+cd $RELEASES_DIR
+ls -1t | grep '^release_' | tail -n +6 | xargs rm -rf || true
+
+echo "🧹 Cleaning old backups..."
+cd $BACKUP_DIR
+ls -1t | tail -n +6 | xargs rm -rf || true
+
+echo "✅ Deployment completed successfully!"
