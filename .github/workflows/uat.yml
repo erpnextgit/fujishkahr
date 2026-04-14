@@ -1,0 +1,36 @@
+name: UAT Deployment
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 📦 Create Artifact
+        run: zip -r deploy.zip . -x "*.git*"
+
+      - name: ☁️ Upload to S3
+        run: |
+          aws s3 cp deploy.zip s3://hrfujishka-uat-artifacts/deploy.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION: ap-south-1
+
+      - name: 🚀 Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name hr-uat-fujishka \
+            --deployment-group-name hr-fujishka-uat \
+            --s3-location bucket=hrfujishka-uat-artifacts,key=deploy.zip,bundleType=zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION: ap-south-1
