@@ -161,6 +161,10 @@ doc_events = {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
 		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days"
 	},
+	"Payment Entry": {
+		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
+		"on_cancel": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_adv_req_status_on_cancel"
+	},
 }
 
 # Scheduled Tasks
