@@ -21,6 +21,11 @@
   "column_break_lqxm",
   "requested_amount",
   "approved_amount",
+  "section_break_5dbr",
+  "api_response",
+  "api_status",
+  "column_break_teqr",
+  "rejection_reason",
   "amended_from"
  ],
  "fields": [
@@ -133,13 +138,36 @@
    "fieldtype": "Date",
    "label": "Payment Credit Date",
    "permlevel": 1
+  },
+  {
+   "fieldname": "section_break_5dbr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "api_response",
+   "fieldtype": "Small Text",
+   "label": "API Response"
+  },
+  {
+   "fieldname": "api_status",
+   "fieldtype": "Data",
+   "label": "API Status"
+  },
+  {
+   "fieldname": "column_break_teqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Rejection Reason"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-14 16:08:12.970306",
+ "modified": "2026-04-17 17:40:05.487192",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",
