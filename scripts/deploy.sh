@@ -4,7 +4,7 @@ set -e
 echo "🔧 Setting environment..."
 export PATH=$PATH:/home/frappe/.local/bin
 
-# Variables
+# ── Variables ──
 SITE="hr-uat.fujishkaerp.com"
 BENCH_DIR="/home/frappe/fujishka-bench"
 RELEASES_DIR="/home/frappe/releases"
@@ -14,48 +14,68 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 RELEASE_DIR="$RELEASES_DIR/release_$TIMESTAMP"
 PREVIOUS_APP_BACKUP="$BACKUP_DIR/app_backup_$TIMESTAMP"
 
-echo "🚀 Starting deployment..."
+echo "🚀 Starting deployment at $TIMESTAMP..."
 
 cd $BENCH_DIR
 
+# ── Step 1: Create release folder ──
 echo "📦 Creating release folder..."
 mkdir -p $RELEASE_DIR
 
+# ── Step 2: Copy artifact ──
 echo "📦 Copying artifact..."
 cp -r $DEPLOY_TMP/* $RELEASE_DIR/
 
+# ── Step 3: DB Backup (MANDATORY — stops deploy if fails) ──
 echo "💾 Taking DB backup..."
 mkdir -p $BACKUP_DIR
-bench --site $SITE backup --with-files || echo "⚠️ Backup failed, continuing..."
+if ! bench --site $SITE backup --with-files; then
+    echo "❌ Backup failed — stopping deployment for safety!"
+    echo "❌ Fix backup issue before deploying."
+    exit 1
+fi
+echo "✅ Backup completed successfully"
 
-echo "📦 Backing up current app (for rollback)..."
+# Find the backup file just created
+LATEST_BACKUP=$(ls -t $BENCH_DIR/sites/$SITE/private/backups/*.sql.gz 2>/dev/null | head -n 1)
+echo "📦 Backup saved at: $LATEST_BACKUP"
+
+# ── Step 4: Backup current app code (for rollback) ──
+echo "📦 Backing up current app code..."
 mkdir -p $PREVIOUS_APP_BACKUP
 cp -r $BENCH_DIR/apps/fujishkahr $PREVIOUS_APP_BACKUP/ || true
 
+# ── Step 5: Deploy new app code ──
 echo "🔁 Updating custom app..."
 rm -rf $BENCH_DIR/apps/fujishkahr
 cp -r $RELEASE_DIR $BENCH_DIR/apps/fujishkahr
 
-echo "📦 Init git for bench compatibility..."
+# ── Step 6: Init git (required by bench) ──
+echo "📦 Initialising git for bench compatibility..."
 cd $BENCH_DIR/apps/fujishkahr
 git init
 git add .
 git commit -m "deploy-$TIMESTAMP" --quiet
 
+# ── Step 7: Install Python package ──
 echo "📦 Installing fujishkahr package..."
 cd $BENCH_DIR
 source env/bin/activate
 pip install -e apps/fujishkahr --quiet
 deactivate
 
+# ── Step 8: Run DB Migration ──
 echo "⚙️ Running migrations..."
 if ! bench --site $SITE migrate; then
-    echo "❌ Migration failed! Rolling back app..."
+    echo "❌ Migration failed! Starting auto recovery..."
 
+    # ── Rollback Step 1: Restore old app code ──
+    echo "🔁 Restoring previous app code..."
     rm -rf $BENCH_DIR/apps/fujishkahr
     cp -r $PREVIOUS_APP_BACKUP/fujishkahr $BENCH_DIR/apps/
 
-    echo "📦 Re-installing previous app..."
+    # ── Rollback Step 2: Reinstall old app ──
+    echo "📦 Reinstalling previous app package..."
     cd $BENCH_DIR/apps/fujishkahr
     git init
     git add .
@@ -66,25 +86,67 @@ if ! bench --site $SITE migrate; then
     pip install -e apps/fujishkahr --quiet
     deactivate
 
-    echo "🔁 Reverting migration..."
+    # ── Rollback Step 3: Re-run migration on old code ──
+    echo "🔁 Re-running migration on old code..."
     bench --site $SITE migrate || true
 
-    echo "❌ Rollback completed. Exiting..."
+    # ── Rollback Step 4: Restart services ──
+    echo "🔄 Restarting services..."
+    sudo supervisorctl restart all || bench restart || true
+    sleep 8
+
+    # ── Rollback Step 5: Health check ──
+    echo "🔍 Checking site health after rollback..."
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+      --max-time 15 http://localhost 2>/dev/null || echo "000")
+    echo "--- SITE STATUS: $HTTP_STATUS ---"
+
+    # ── Rollback Step 6: If site broken → auto restore DB ──
+    if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "302" ]; then
+        echo "❌ Site is broken after rollback — restoring DB automatically..."
+
+        if [ -z "$LATEST_BACKUP" ]; then
+            echo "❌ No backup found — manual intervention required!"
+            exit 1
+        fi
+
+        echo "📦 Restoring DB from backup: $LATEST_BACKUP"
+        bench --site $SITE restore $LATEST_BACKUP --force
+
+        echo "⚙️ Running migration on restored DB..."
+        bench --site $SITE migrate || true
+
+        echo "🧹 Clearing cache..."
+        bench --site $SITE clear-cache
+
+        echo "🔄 Restarting services after DB restore..."
+        sudo supervisorctl restart all || bench restart || true
+
+        echo "✅ DB restored automatically — site recovered!"
+    else
+        echo "✅ Site is healthy after rollback — DB restore not needed"
+    fi
+
+    echo "❌ Deployment failed. Site is running on previous version."
     exit 1
 fi
 
 echo "✅ Migration succeeded!"
 
+# ── Step 9: Build assets ──
 echo "🎨 Building assets..."
 bench build || echo "⚠️ Build warning, continuing..."
 
+# ── Step 10: Clear cache ──
 echo "🧹 Clearing cache..."
 bench --site $SITE clear-cache
 
+# ── Step 11: Restart services ──
 echo "🔄 Restarting services..."
 sudo supervisorctl restart all || bench restart || echo "⚠️ Restart warning, continuing..."
 
+# ── Step 12: Clean deploy_tmp ──
 echo "🧹 Cleaning deploy_tmp..."
 rm -rf $DEPLOY_TMP/*
 
-echo "✅ Deployment completed successfully!"
+echo "✅ Deployment completed successfully at $(date +%Y%m%d_%H%M%S)!"
