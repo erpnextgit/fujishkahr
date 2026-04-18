@@ -34,7 +34,7 @@ cp -r $BENCH_DIR/apps/fujishkahr $PREVIOUS_APP_BACKUP/ || true
 
 echo "🔁 Updating custom app..."
 rm -rf $BENCH_DIR/apps/fujishkahr
-cp -r $RELEASE_DIR/fujishkahr $BENCH_DIR/apps/
+cp -r $RELEASE_DIR $BENCH_DIR/apps/fujishkahr
 
 echo "📦 Installing requirements..."
 bench setup requirements
