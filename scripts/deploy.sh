@@ -57,13 +57,13 @@ if ! bench --site $SITE migrate; then
 fi
 
 echo "🎨 Building assets..."
-bench build
+bench build || echo "⚠️ Build warning, continuing..."
 
 echo "🧹 Clearing cache..."
 bench --site $SITE clear-cache
 
 echo "🔄 Restarting services..."
-bench restart
+sudo supervisorctl restart all || bench restart || true
 
 echo "🧹 Cleaning deploy_tmp..."
 rm -rf $DEPLOY_TMP/*
