@@ -12,4 +12,4 @@ cd $BENCH_DIR
 
 bench --site $SITE backup --with-files
 
-echo "✅ Backup completed successfullyy"
+echo "✅ Backup completed successfully"
