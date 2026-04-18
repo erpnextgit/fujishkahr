@@ -12,7 +12,7 @@ BACKUP_DIR="/home/frappe/backups"
 DEPLOY_TMP="/home/frappe/deploy_tmp"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 RELEASE_DIR="$RELEASES_DIR/release_$TIMESTAMP"
-PREVIOUS_APP_BACKUP="/home/frappe/backups/app_backup_$TIMESTAMP"
+PREVIOUS_APP_BACKUP="$BACKUP_DIR/app_backup_$TIMESTAMP"
 
 echo "🚀 Starting deployment..."
 
@@ -36,8 +36,17 @@ echo "🔁 Updating custom app..."
 rm -rf $BENCH_DIR/apps/fujishkahr
 cp -r $RELEASE_DIR $BENCH_DIR/apps/fujishkahr
 
-echo "📦 Installing requirements..."
-bench setup requirements
+echo "📦 Init git for bench compatibility..."
+cd $BENCH_DIR/apps/fujishkahr
+git init
+git add .
+git commit -m "deploy-$TIMESTAMP" --quiet
+
+echo "📦 Installing fujishkahr package..."
+cd $BENCH_DIR
+source env/bin/activate
+pip install -e apps/fujishkahr --quiet
+deactivate
 
 echo "⚙️ Running migrations..."
 if ! bench --site $SITE migrate; then
@@ -46,8 +55,16 @@ if ! bench --site $SITE migrate; then
     rm -rf $BENCH_DIR/apps/fujishkahr
     cp -r $PREVIOUS_APP_BACKUP/fujishkahr $BENCH_DIR/apps/
 
-    echo "🔄 Re-installing old dependencies..."
-    bench setup requirements
+    echo "📦 Re-installing previous app..."
+    cd $BENCH_DIR/apps/fujishkahr
+    git init
+    git add .
+    git commit -m "rollback-$TIMESTAMP" --quiet
+
+    cd $BENCH_DIR
+    source env/bin/activate
+    pip install -e apps/fujishkahr --quiet
+    deactivate
 
     echo "🔁 Reverting migration..."
     bench --site $SITE migrate || true
@@ -56,6 +73,8 @@ if ! bench --site $SITE migrate; then
     exit 1
 fi
 
+echo "✅ Migration succeeded!"
+
 echo "🎨 Building assets..."
 bench build || echo "⚠️ Build warning, continuing..."
 
@@ -63,7 +82,7 @@ echo "🧹 Clearing cache..."
 bench --site $SITE clear-cache
 
 echo "🔄 Restarting services..."
-sudo supervisorctl restart all || bench restart || true
+sudo supervisorctl restart all || bench restart || echo "⚠️ Restart warning, continuing..."
 
 echo "🧹 Cleaning deploy_tmp..."
 rm -rf $DEPLOY_TMP/*
