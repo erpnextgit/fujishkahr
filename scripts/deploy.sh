@@ -24,6 +24,10 @@ mkdir -p $RELEASE_DIR
 echo "📦 Copying artifact..."
 cp -r $DEPLOY_TMP/* $RELEASE_DIR/
 
+echo "💾 Taking DB backup..."
+mkdir -p $BACKUP_DIR
+bench --site $SITE backup --with-files || echo "⚠️ Backup failed, continuing..."
+
 echo "📦 Backing up current app (for rollback)..."
 mkdir -p $PREVIOUS_APP_BACKUP
 cp -r $BENCH_DIR/apps/fujishkahr $PREVIOUS_APP_BACKUP/ || true
@@ -38,6 +42,7 @@ bench setup requirements
 echo "⚙️ Running migrations..."
 if ! bench --site $SITE migrate; then
     echo "❌ Migration failed! Rolling back app..."
+
     rm -rf $BENCH_DIR/apps/fujishkahr
     cp -r $PREVIOUS_APP_BACKUP/fujishkahr $BENCH_DIR/apps/
 
