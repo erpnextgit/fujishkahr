@@ -75,7 +75,7 @@ if ! bench --site $SITE migrate; then
     cp -r $PREVIOUS_APP_BACKUP/fujishkahr $BENCH_DIR/apps/
 
     # ── Rollback Step 2: Reinstall old app ──
-    echo "📦 Reinstalling previous app package...."
+    echo "📦 Reinstalling previous app package..."
     cd $BENCH_DIR/apps/fujishkahr
     git init
     git add .
@@ -133,13 +133,20 @@ fi
 
 echo "✅ Migration succeeded!"
 
-# ── Step 9: Build fujishkahr assets only (skip frappe/erpnext/hrms) ──
+# ── Step 9: Build fujishkahr assets only ──
+# Note: frappe/erpnext/hrms assets are permanent — built once on server
+# Only fujishkahr changes on every deploy
 echo "🎨 Building fujishkahr assets only..."
-bench build --app fujishkahr || echo "⚠️ Build warning, continuing..."
+if ! NODE_OPTIONS="--max-old-space-size=512" bench build --app fujishkahr; then
+    echo "❌ Build failed — check server memory: free -h"
+    exit 1
+fi
+echo "✅ Build completed!"
 
 # ── Step 10: Clear cache ──
 echo "🧹 Clearing cache..."
 bench --site $SITE clear-cache
+bench --site $SITE clear-website-cache
 
 # ── Step 11: Restart services ──
 echo "🔄 Restarting services..."
