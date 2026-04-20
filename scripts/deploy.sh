@@ -36,7 +36,7 @@ if ! bench --site $SITE backup --with-files; then
 fi
 echo "✅ Backup completed successfully"
 
-# Find the backup file just created
+# Save latest backup path for auto DB restore if needed
 LATEST_BACKUP=$(ls -t $BENCH_DIR/sites/$SITE/private/backups/*.sql.gz 2>/dev/null | head -n 1)
 echo "📦 Backup saved at: $LATEST_BACKUP"
 
@@ -57,8 +57,8 @@ git init
 git add .
 git commit -m "deploy-$TIMESTAMP" --quiet
 
-# ── Step 7: Install Python package ──
-echo "📦 Installing fujishkahr package..."
+# ── Step 7: Install fujishkahr only (skip frappe/erpnext/hrms) ──
+echo "📦 Installing fujishkahr package only..."
 cd $BENCH_DIR
 source env/bin/activate
 pip install -e apps/fujishkahr --quiet
@@ -103,14 +103,14 @@ if ! bench --site $SITE migrate; then
 
     # ── Rollback Step 6: If site broken → auto restore DB ──
     if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "302" ]; then
-        echo "❌ Site is broken after rollback — restoring DB automatically..."
+        echo "❌ Site broken after rollback — restoring DB automatically..."
 
         if [ -z "$LATEST_BACKUP" ]; then
             echo "❌ No backup found — manual intervention required!"
             exit 1
         fi
 
-        echo "📦 Restoring DB from backup: $LATEST_BACKUP"
+        echo "📦 Restoring DB from: $LATEST_BACKUP"
         bench --site $SITE restore $LATEST_BACKUP --force
 
         echo "⚙️ Running migration on restored DB..."
@@ -119,23 +119,23 @@ if ! bench --site $SITE migrate; then
         echo "🧹 Clearing cache..."
         bench --site $SITE clear-cache
 
-        echo "🔄 Restarting services after DB restore..."
+        echo "🔄 Restarting after DB restore..."
         sudo supervisorctl restart all || bench restart || true
 
         echo "✅ DB restored automatically — site recovered!"
     else
-        echo "✅ Site is healthy after rollback — DB restore not needed"
+        echo "✅ Site healthy after rollback — DB restore not needed"
     fi
 
-    echo "❌ Deployment failed. Site is running on previous version."
+    echo "❌ Deployment failed. Site running on previous version."
     exit 1
 fi
 
 echo "✅ Migration succeeded!"
 
-# ── Step 9: Build assets ──
-echo "🎨 Building assets..."
-bench build || echo "⚠️ Build warning, continuing..."
+# ── Step 9: Build fujishkahr assets only (skip frappe/erpnext/hrms) ──
+echo "🎨 Building fujishkahr assets only..."
+bench build --app fujishkahr || echo "⚠️ Build warning, continuing..."
 
 # ── Step 10: Clear cache ──
 echo "🧹 Clearing cache..."
