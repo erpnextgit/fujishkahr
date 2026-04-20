@@ -75,7 +75,7 @@ if ! bench --site $SITE migrate; then
     cp -r $PREVIOUS_APP_BACKUP/fujishkahr $BENCH_DIR/apps/
 
     # ── Rollback Step 2: Reinstall old app ──
-    echo "📦 Reinstalling previous app package..."
+    echo "📦 Reinstalling previous app package...."
     cd $BENCH_DIR/apps/fujishkahr
     git init
     git add .
