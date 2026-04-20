@@ -135,7 +135,7 @@ echo "✅ Migration succeeded!"
 
 # ── Step 9: Build fujishkahr assets only (skip frappe/erpnext/hrms) ──
 echo "🎨 Building fujishkahr assets only..."
-bench build --app fujishkahr || echo "⚠️ Build warning, continuing..."
+bench build --hard-link || echo "⚠️ Build warning, continuing..."
 
 # ── Step 10: Clear cache ──
 echo "🧹 Clearing cache..."
