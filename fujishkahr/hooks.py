@@ -165,6 +165,10 @@ doc_events = {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
 		"on_cancel": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_adv_req_status_on_cancel"
 	},
+	"Advance Request": {
+		"on_change": "fujishkahr.api.api.on_change",
+	},
+
 }
 
 # Scheduled Tasks
