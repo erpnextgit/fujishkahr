@@ -6,6 +6,10 @@ on:
       - dev
   workflow_dispatch:
 
+concurrency:
+  group: uat-deployment
+  cancel-in-progress: true
+
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -31,10 +35,10 @@ jobs:
           body: |
             UAT Deployment has started.
 
-            Branch   : ${{ github.ref_name }}
-            Commit   : ${{ github.sha }}
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
             Triggered by : ${{ github.actor }}
-            Time     : ${{ github.event.head_commit.timestamp }}
+            Time         : ${{ github.event.head_commit.timestamp }}
 
             Commit Message:
             ${{ github.event.head_commit.message }}
@@ -49,11 +53,7 @@ jobs:
       # ── Step 3: Zip and Upload to S3 ──
       - name: 📦 Create Artifact and Upload to S3
         run: |
-          zip -r deploy.zip . \
-            -x "*.git*" \
-            -x "*.pyc" \
-            -x "__pycache__/*" \
-            -x "node_modules/*" \
+          zip -r deploy.zip . -x "*.git*" -x "*.pyc" -x "__pycache__/*" -x "node_modules/*"
           aws s3 cp deploy.zip s3://hrfujishka-uat-artifacts/deploy.zip
 
       # ── Step 4: Trigger CodeDeploy ──
@@ -115,8 +115,8 @@ jobs:
           body: |
             ✅ UAT Deployment completed successfully!
 
-            Branch   : ${{ github.ref_name }}
-            Commit   : ${{ github.sha }}
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
             Deployed by  : ${{ github.actor }}
             Deployment ID: ${{ env.DEPLOYMENT_ID }}
 
@@ -143,8 +143,8 @@ jobs:
           body: |
             ❌ UAT Deployment FAILED!
 
-            Branch   : ${{ github.ref_name }}
-            Commit   : ${{ github.sha }}
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
             Triggered by : ${{ github.actor }}
             Deployment ID: ${{ env.DEPLOYMENT_ID }}
 
