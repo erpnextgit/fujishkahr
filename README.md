@@ -28,6 +28,10 @@ Pre-commit is configured to use the following tools for checking and formatting 
 - prettier
 - pyupgrade
 
+# Fujishka HR
+
+ERPNext custom app for Fujishka HR management.
+
 ### License
 
 mit
