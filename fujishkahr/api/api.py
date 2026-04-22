@@ -191,6 +191,8 @@ def payment_callback():
 			apply_workflow(doc, "Reject Payment")
 			doc.db_set("api_status", "Payment Rejected")
 
+			send_rejection_email(doc, reason)
+
 		# HANDLE APPROVAL
 		elif status == "Approved":
 			create_payment_entry(doc)
@@ -282,4 +284,82 @@ def create_payment_entry(doc):
 
 	except Exception as e:
 		frappe.log_error("Payment Entry Creation Failed", frappe.get_traceback())
+
+def send_rejection_email(doc, reason):
+	"""
+		Send an email notification to HR Managers when a payment request is rejected,
+		including details of the request and the reason for rejection
+	"""
+	hr_users = frappe.db.get_all(
+		"Employee",
+		filters={
+			"company": doc.company,
+			"status": "Active"
+		},
+		pluck="user_id"
+	)
+
+	hr_managers = []
+	for user in hr_users:
+		if not user:
+			continue
+		has_role = frappe.db.exists("Has Role", {
+			"parent": user,
+			"role": "HR Manager",
+			"parenttype": "User"
+		})
+		if has_role:
+			hr_managers.append(user)
+
+	if not hr_managers:
+		frappe.log_error(
+			f"No HR Manager found for company {doc.company}",
+			"Rejection Email"
+		)
+		return
+
+	frappe.sendmail(
+		recipients=hr_managers,
+		subject=f"Payment Rejected – {doc.name} ({doc.employee_name})",
+		message=f"""
+			<p>Dear HR Team,</p>
+
+			<p>The payment request has been
+			<b style="color: red;">Rejected</b>.</p>
+
+			<table border="1" cellpadding="8" cellspacing="0"
+				   style="border-collapse: collapse; width: 100%;">
+				<tr>
+					<td><b>Request ID</b></td>
+					<td>{doc.name}</td>
+				</tr>
+				<tr>
+					<td><b>Employee</b></td>
+					<td>{doc.employee_name}</td>
+				</tr>
+				<tr>
+					<td><b>Company</b></td>
+					<td>{doc.company}</td>
+				</tr>
+				<tr>
+					<td><b>Department</b></td>
+					<td>{doc.department}</td>
+				</tr>
+				<tr>
+					<td><b>Approved Amount</b></td>
+					<td>{doc.approved_amount}</td>
+				</tr>
+				<tr>
+					<td><b>Rejection Reason</b></td>
+					<td><b style="color: red;">{reason or "No reason provided"}</b></td>
+				</tr>
+			</table>
+
+			<br>
+			<p>Please review and take necessary action.</p>
+
+			<p>Regards,<br>System</p>
+		""",
+		now=True
+	)
 
