@@ -54,7 +54,6 @@ jobs:
             -x "*.pyc" \
             -x "__pycache__/*" \
             -x "node_modules/*" \
-            -x "*.md"
           aws s3 cp deploy.zip s3://hrfujishka-uat-artifacts/deploy.zip
 
       # ── Step 4: Trigger CodeDeploy ──
