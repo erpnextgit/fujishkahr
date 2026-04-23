@@ -223,7 +223,8 @@ function call_registration_api(frm) {
 		args: {
 			company_code:    frm.doc.company_code,
 			branch_code:     frm.doc.branch_code,
-			branch_password: frm.doc.branch_password
+			branch_password: frm.doc.branch_password,
+			base_url:        window.location.origin
 		},
 		freeze: true,
 		freeze_message: __("Connecting to Fujishka API..."),
