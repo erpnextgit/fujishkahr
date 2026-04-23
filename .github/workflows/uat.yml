@@ -1,0 +1,163 @@
+name: UAT Deployment
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+concurrency:
+  group: uat-deployment
+  cancel-in-progress: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_REGION: ap-south-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ── Step 1: Notify deployment STARTED ──
+      - name: 📧 Notify Deployment Started
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🚀 [Fujishka UAT] Deployment Started"
+          to: ${{ secrets.NOTIFY_EMAILS }}
+          from: "Fujishka CI/CD <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            UAT Deployment has started.
+
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
+            Triggered by : ${{ github.actor }}
+            Time         : ${{ github.event.head_commit.timestamp }}
+
+            Commit Message:
+            ${{ github.event.head_commit.message }}
+
+            View workflow:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # ── Step 2: Checkout Code ──
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      # ── Step 3: Zip and Upload to S3 ──
+      - name: 📦 Create Artifact and Upload to S3
+        run: |
+          zip -r deploy.zip . -x "*.git*" -x "*.pyc" -x "__pycache__/*" -x "node_modules/*"
+          aws s3 cp deploy.zip s3://hrfujishka-uat-artifacts/deploy.zip
+
+      # ── Step 4: Trigger CodeDeploy ──
+      - name: 🚀 Trigger CodeDeploy
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name hr-uat-fujishka \
+            --deployment-group-name hr-fujishka-uat \
+            --s3-location bucket=hrfujishka-uat-artifacts,key=deploy.zip,bundleType=zip \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --query 'deploymentId' \
+            --output text)
+
+          echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+      # ── Step 5: Wait for CodeDeploy to complete ──
+      - name: ⏳ Wait for Deployment to Complete
+        run: |
+          echo "Waiting for deployment ${{ env.DEPLOYMENT_ID }} to complete..."
+
+          for i in $(seq 1 30); do
+            STATUS=$(aws deploy get-deployment \
+              --deployment-id ${{ env.DEPLOYMENT_ID }} \
+              --query 'deploymentInfo.status' \
+              --output text)
+
+            echo "Status: $STATUS (check $i/30)"
+
+            if [ "$STATUS" = "Succeeded" ]; then
+              echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
+              echo "✅ Deployment Succeeded!"
+              exit 0
+            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Stopped" ]; then
+              echo "DEPLOY_STATUS=failed" >> $GITHUB_ENV
+              echo "❌ Deployment Failed!"
+              exit 1
+            fi
+
+            sleep 20
+          done
+
+          echo "DEPLOY_STATUS=timeout" >> $GITHUB_ENV
+          echo "⏱️ Deployment timed out!"
+          exit 1
+
+      # ── Step 6: Notify SUCCESS ──
+      - name: 📧 Notify Deployment Succeeded
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "✅ [Fujishka UAT] Deployment Succeeded"
+          to: ${{ secrets.NOTIFY_EMAILS }}
+          from: "Fujishka CI/CD <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            ✅ UAT Deployment completed successfully!
+
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
+            Deployed by  : ${{ github.actor }}
+            Deployment ID: ${{ env.DEPLOYMENT_ID }}
+
+            Commit Message:
+            ${{ github.event.head_commit.message }}
+
+            UAT Site: https://hr-uat.fujishkaerp.com
+
+            View workflow:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # ── Step 7: Notify FAILURE ──
+      - name: 📧 Notify Deployment Failed
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "❌ [Fujishka UAT] Deployment FAILED — Action Required"
+          to: ${{ secrets.NOTIFY_EMAILS }}
+          from: "Fujishka CI/CD <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            ❌ UAT Deployment FAILED!
+
+            Branch       : ${{ github.ref_name }}
+            Commit       : ${{ github.sha }}
+            Triggered by : ${{ github.actor }}
+            Deployment ID: ${{ env.DEPLOYMENT_ID }}
+
+            Commit Message:
+            ${{ github.event.head_commit.message }}
+
+            Action Required:
+            1. Check deployment logs in AWS CodeDeploy
+            2. SSH into UAT server and check: tail -50 logs/frappe.log
+            3. Fix the issue and push again
+
+            View workflow logs:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            AWS CodeDeploy:
+            https://ap-south-1.console.aws.amazon.com/codesuite/codedeploy/deployments/${{ env.DEPLOYMENT_ID }}
