@@ -147,6 +147,7 @@
    "allow_on_submit": 1,
    "fieldname": "api_response",
    "fieldtype": "Long Text",
+   "hidden": 1,
    "label": "API Response"
   },
   {
@@ -154,7 +155,8 @@
    "fieldname": "api_status",
    "fieldtype": "Select",
    "label": "API Status",
-   "options": "\nSent\nFailed\nError\nCompleted\nPayment Rejected"
+   "options": "\nSent\nFailed\nError\nCompleted\nPayment Rejected",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_teqr",
@@ -164,14 +166,15 @@
    "allow_on_submit": 1,
    "fieldname": "rejection_reason",
    "fieldtype": "Long Text",
-   "label": "Rejection Reason"
+   "label": "Rejection Reason",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-21 11:34:26.392452",
+ "modified": "2026-04-27 16:22:49.469497",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",
