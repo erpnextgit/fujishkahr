@@ -94,6 +94,38 @@ def call_external_api(docname):
 	"""
 	doc = frappe.get_doc("Advance Request", docname)
 
+	# Get branch from employee
+	emp_branch = frappe.db.get_value(
+		"Employee", doc.employee, "branch"
+	)
+
+	if not emp_branch:
+		doc.db_set("api_status", "Error")
+		doc.db_set("api_response",
+			f"No branch linked to employee {doc.employee}")
+		frappe.log_error("API ERROR",
+			f"No branch linked to employee {doc.employee}")
+		return
+
+	# Get token from Branch Integration for this branch
+	branch = frappe.db.get_value(
+		"Branch Integration",
+		{
+			"branch": emp_branch,
+			"branch_erpnext_status": "Accepted"
+		},
+		["token", "endpoint"],
+		as_dict=True
+	)
+
+	if not branch:
+		doc.db_set("api_status", "Error")
+		doc.db_set("api_response",
+			f"No active Branch Integration found for branch {emp_branch}")
+		frappe.log_error("API ERROR",
+			f"No active Branch Integration for branch {emp_branch}")
+		return
+
 	employee_advance = frappe.db.get_value(
 		"Employee Advance",
 		{"advance_request": doc.name},
@@ -101,23 +133,25 @@ def call_external_api(docname):
 	)
 
 	data = {
-		"approved_amount": doc.approved_amount,
-		"employee": doc.employee,
-		"employee_name": doc.employee_name,
-		"advance_request": doc.name,
-		"employee_advance": employee_advance
+		"eap_employee_id":     doc.employee,
+		"eap_employee_name":   doc.employee_name,
+		"eap_advance_id":      employee_advance or "",
+		"eap_advance_request": doc.name,
+		"eap_amount":          doc.approved_amount,
+		"eap_request_date":    str(doc.posting_date)
 	}
 
 	frappe.log_error(title="API REQUEST", message=str(data))
 
 	try:
 		response = requests.post(
-			"https://fujishka.com/erpnext/advance_request/json",
+			branch.endpoint.rstrip('/') + "/erpnext/employee-advance/create",
 			json=data,
 			headers={
 				"Content-Type": "application/json",
-				"Accept": "application/json",
-				"User-Agent": "Frappe"
+				"Accept":       "application/json",
+				"erpnexttoken": branch.token,
+				"User-Agent":   "Frappe"
 			},
 			timeout=10
 		)
@@ -149,54 +183,81 @@ def call_external_api(docname):
 @frappe.whitelist(allow_guest=True)
 def payment_callback():
 	"""
-		Endpoint for external system to send payment status updates for Advance Requests
+	Endpoint for external system to send payment status updates
+	Handles: Approved, Rejected, Cancelled
+	Token verified per branch from Branch Integration
 	"""
 	try:
 		data = frappe.request.get_json()
 		frappe.log_error("CALLBACK RECEIVED", str(data))
 
-		# SECURITY
-		settings = frappe.get_single("Callback Settings")
+		# Get token from header
 		token = frappe.request.headers.get("X-API-Key")
 
-		if not token or token != settings.api_token:
+		if not token:
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
-		frappe.set_user("Administrator")
-
-		# VALIDATE
+		# Validate required fields
 		advance_request = data.get("advance_request")
-		status = data.get("status")
-		reason = data.get("reason")
+		status          = data.get("status")
+		reason          = data.get("reason")
 
 		if not advance_request:
 			frappe.local.response.http_status_code = 400
 			return {"error": "Missing advance_request"}
 
-		if status not in ["Approved", "Rejected"]:
+		if status not in ["Approved", "Rejected", "Cancelled"]:
 			frappe.local.response.http_status_code = 400
 			return {"error": "Invalid status"}
 
+		# Get employee and branch from Advance Request
+		employee = frappe.db.get_value(
+			"Advance Request", advance_request, "employee"
+		)
+		emp_branch = frappe.db.get_value(
+			"Employee", employee, "branch"
+		)
+
+		# Get callback token from Branch Integration for this branch
+		callback_token = frappe.db.get_value(
+			"Branch Integration",
+			{
+				"branch":                emp_branch,
+				"branch_erpnext_status": "Accepted"
+			},
+			"callback_token"
+		)
+
+		# Verify token
+		if not callback_token or token != callback_token:
+			frappe.local.response.http_status_code = 401
+			return {"error": "Unauthorized"}
+
+		frappe.set_user("Administrator")
+
 		doc = frappe.get_doc("Advance Request", advance_request)
 
-		# PREVENT DUPLICATE
-		if doc.api_status in ["Completed", "Payment Rejected"]:
+		# Prevent duplicate processing
+		if status != "Cancelled" and doc.api_status in ["Completed", "Payment Rejected"]:
 			return {"message": "Already processed"}
 
-		# HANDLE REJECTION
+		# Handle Rejection
 		if status == "Rejected":
 			doc.db_set("rejection_reason", reason or "No reason provided")
 			doc.reload()
 			apply_workflow(doc, "Reject Payment")
 			doc.db_set("api_status", "Payment Rejected")
-
 			send_rejection_email(doc, reason)
 
-		# HANDLE APPROVAL
+		# Handle Approval
 		elif status == "Approved":
 			create_payment_entry(doc)
 			doc.db_set("api_status", "Completed")
+
+		# Handle Cancellation
+		elif status == "Cancelled":
+			cancel_payment_entry(doc)
 
 		return {"message": "Processed successfully"}
 
@@ -207,6 +268,75 @@ def payment_callback():
 
 	finally:
 		frappe.set_user("Guest")
+
+
+def cancel_payment_entry(doc):
+	"""
+	Cancel Payment Entry linked to Advance Request
+	Reset Employee Advance to Unpaid
+	Reset Advance Request back to Payment Initiated
+	"""
+	# Get Employee Advance linked to this Advance Request
+	employee_advance = frappe.db.get_value(
+		"Employee Advance",
+		{"advance_request": doc.name},
+		"name"
+	)
+
+	if not employee_advance:
+		frappe.log_error(
+			"Cancel Error",
+			f"No Employee Advance found for {doc.name}"
+		)
+		return
+
+	# Find submitted Payment Entry for this Employee Advance
+	payment_entry = frappe.db.get_value(
+		"Payment Entry Reference",
+		{
+			"reference_doctype": "Employee Advance",
+			"reference_name":    employee_advance
+		},
+		"parent"
+	)
+
+	if not payment_entry:
+		frappe.log_error(
+			"Cancel Error",
+			f"No Payment Entry found for {employee_advance}"
+		)
+		return
+
+	# Cancel Payment Entry if submitted
+	pe_doc = frappe.get_doc("Payment Entry", payment_entry)
+	if pe_doc.docstatus == 1:
+		pe_doc.cancel()
+		frappe.log_error(
+			"Payment Entry Cancelled",
+			f"{payment_entry} cancelled successfully"
+		)
+
+	# Reset Employee Advance to Unpaid
+	frappe.db.set_value(
+		"Employee Advance",
+		employee_advance,
+		"status", "Unpaid"
+	)
+
+	# Reset Advance Request to Payment Initiated using existing Reopen transition
+	doc.reload()
+	if doc.workflow_state == "Paid":
+		apply_workflow(doc, "Reopen")
+
+	# Reset API fields
+	doc.db_set("api_status", "")
+	doc.db_set("api_response",
+		"Payment cancelled by external system. Waiting for new payment.")
+
+	frappe.log_error(
+		"Advance Request Reset",
+		f"{doc.name} reset to Payment Initiated after cancellation"
+	)
 
 def create_payment_entry(doc):
 	"""Create a Payment Entry for the approved Advance Request
@@ -363,3 +493,20 @@ def send_rejection_email(doc, reason):
 		now=True
 	)
 
+@frappe.whitelist()
+def generate_callback_token(branch_name):
+	"""
+	Generate and save a random callback token
+	for a Branch Integration record
+	"""
+	import secrets
+	callback_token = secrets.token_hex(32)
+
+	frappe.db.set_value(
+		"Branch Integration",
+		branch_name,
+		"callback_token", callback_token
+	)
+	frappe.db.commit()
+
+	return callback_token
