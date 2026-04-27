@@ -5,6 +5,7 @@ frappe.ui.form.on('Advance Request', {
 	refresh(frm) {
 		toggle_required(frm);
 		create_additional_salary(frm);
+		hide_cancel_button(frm);
 	},
 	workflow_state(frm) {
 		toggle_required(frm);
@@ -169,5 +170,12 @@ function create_additional_salary(frm) {
 			}
 		});
 
+	}
+}
+
+// Hide cancel button if document is submitted
+function hide_cancel_button(frm) {
+	if (frm.doc.docstatus === 1){
+		frm.page.btn_secondary.hide();
 	}
 }

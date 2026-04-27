@@ -11,5 +11,12 @@ def get_branch_custom_fields():
 				"insert_after": "branch",
 				"unique": 1,
 			},
+			{
+				"fieldtype": "Link",
+				"label": "Company",
+				"fieldname": "company",
+				"insert_after": "branch_code",
+				"options": "Company",
+			},
 		]
 	}
