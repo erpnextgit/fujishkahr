@@ -18,13 +18,13 @@ def get_branch_custom_fields():
 				"options": "Company",
 				"reqd": 1,
 			},
-            {
-                "fieldtype":    "Data",
-                "label":        "Branch Unique Name",
-                "fieldname":    "branch_unique_name",
-                "insert_after": "company",
-                "hidden":       1,
-                "read_only":    1,
-            },
+			{
+				"fieldtype":    "Data",
+				"label":        "Branch Unique Name",
+				"fieldname":    "branch_unique_name",
+				"insert_after": "company",
+				"hidden":       1,
+				"read_only":    1,
+			},
 		]
 	}
