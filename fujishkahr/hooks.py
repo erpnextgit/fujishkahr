@@ -168,7 +168,9 @@ doc_events = {
 	"Advance Request": {
 		"on_change": "fujishkahr.api.api.on_change",
 	},
-
+	"Branch": {
+		"before_insert": "fujishkahr.fujishkahr.custom_scripts.branch.branch.set_branch_name",
+	},
 }
 
 # Scheduled Tasks
