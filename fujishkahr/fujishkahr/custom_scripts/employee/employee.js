@@ -15,10 +15,12 @@ frappe.ui.form.on("Employee", {
 		});
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 	onload: function(frm) {
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 	validate(frm) {
 		validate_probation_dates(frm);
@@ -40,6 +42,7 @@ frappe.ui.form.on("Employee", {
 	company: function(frm) {
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 });
 
@@ -130,6 +133,19 @@ function filter_reports_to_company(frm) {
  */
 function filter_holiday_list(frm) {
 	frm.set_query("holiday_list", function() {
+		return {
+			filters: {
+				"company": frm.doc.company
+			}
+		}
+	})
+}
+
+/*
+ * function to filter  default shift field based on selected company
+ */
+function filter_default_shift(frm) {
+	frm.set_query("default_shift", function() {
 		return {
 			filters: {
 				"company": frm.doc.company
