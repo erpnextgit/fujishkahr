@@ -160,7 +160,8 @@ doc_events = {
 	},
 	"Salary Slip": {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
-		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days"
+		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
+		"on_submit":     "fujishkahr.api.payroll.on_salary_slip_submit",
 	},
 	"Payment Entry": {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
@@ -185,6 +186,11 @@ scheduler_events = {
 	"daily": [
 		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
 	],
+	"cron": {
+		"*/1 * * * *": [
+			"fujishkahr.api.payroll.process_pending_payroll_entries"
+		]
+	}
 }
 
 # 	"hourly": [
