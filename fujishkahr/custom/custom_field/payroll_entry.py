@@ -13,6 +13,7 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_total_salary",
 				"insert_after": "custom_external_payment_section",
 				"allow_on_submit": 1,
+				"read_only": 1,
 			},
 			{
 				"fieldtype": "Currency",
@@ -20,6 +21,7 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_total_deduction",
 				"insert_after": "custom_total_salary",
 				"allow_on_submit": 1,
+				"read_only": 1,
 			},
 			{
 				"fieldtype": "Column Break",
@@ -32,6 +34,7 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_salary_paid",
 				"insert_after": "custom_col_break_payment",
 				"allow_on_submit": 1,
+				"read_only": 1,
 			},
 			{
 				"fieldtype": "Currency",
@@ -39,6 +42,7 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_deduction_paid",
 				"insert_after": "custom_salary_paid",
 				"allow_on_submit": 1,
+				"read_only": 1,
 			},
 			{
 				"fieldtype": "Section Break",
@@ -52,13 +56,41 @@ def get_payroll_entry_custom_fields():
 				"insert_after": "custom_payment_status_section",
 				"options": "\nPending\nPartial\nPaid",
 				"allow_on_submit": 1,
+				"read_only": 1,
+			},
+			{
+				"fieldtype": "Select",
+				"label": "Cancel Status",
+				"fieldname": "custom_cancel_status",
+				"insert_after": "custom_payment_status",
+				"options": "\nCancel Requested\nCancel Approved\nCancel Rejected",
+				"allow_on_submit": 1,
+				"read_only": 1,
+			},
+			{
+				"fieldtype": "Data",
+				"label": "Cancel Reason",
+				"fieldname": "custom_cancel_reason",
+				"insert_after": "custom_cancel_status",
+				"allow_on_submit": 1,
+				"read_only": 1,
+			},
+			{
+				"fieldtype": "Data",
+				"label": "Cancel Rejection Reason",
+				"fieldname": "custom_cancel_rejection_reason",
+				"insert_after": "custom_cancel_reason",
+				"allow_on_submit": 1,
+				"read_only": 1,
 			},
 			{
 				"fieldtype": "Check",
 				"label": "Salary PE Created",
 				"fieldname": "custom_salary_pe_created",
-				"insert_after": "custom_payment_status",
+				"insert_after": "custom_cancel_rejection_reason",
 				"allow_on_submit": 1,
+				"read_only": 1,
+				"hidden": 1,
 			},
 			{
 				"fieldtype": "Check",
@@ -66,6 +98,8 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_deduction_pe_created",
 				"insert_after": "custom_salary_pe_created",
 				"allow_on_submit": 1,
+				"read_only": 1,
+				"hidden": 1,
 			},
 			{
 				"fieldtype": "Check",
@@ -73,6 +107,8 @@ def get_payroll_entry_custom_fields():
 				"fieldname": "custom_api_pushed",
 				"insert_after": "custom_deduction_pe_created",
 				"allow_on_submit": 1,
+				"read_only": 1,
+				"hidden": 1,
 			},
 		]
 	}

@@ -216,6 +216,9 @@ def push_to_external_system(doc, total_salary, total_deduction):
   
 @frappe.whitelist(allow_guest=True)
 def receive_payment():
+	"""
+	Endpoint to receive payment callbacks from external system
+	"""
 	try:
 		data = frappe.request.get_json()
 		frappe.log_error("Payroll Callback Received", str(data))
@@ -282,6 +285,12 @@ def receive_payment():
 
 
 def process_payment_callback(payroll_id, sp_type, amount, sp_date):
+	"""
+	Update the payroll entry based on payment callback:
+	- sp_type 1 = salary payment, 2 = deduction payment
+	- Update custom fields for amount paid so far
+	- If total paid >= total salary/deduction, create JE and mark as paid
+	"""
 	doc = frappe.get_doc("Payroll Entry", payroll_id)
 
 	if sp_type == 1:
@@ -306,6 +315,9 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 
 
 def create_salary_journal_entry(doc, amount, sp_date):
+	"""
+	Create Journal Entry to record salary payment
+	"""
 	company = doc.company
 	payroll_payable = frappe.db.get_value("Company", company, "default_payroll_payable_account")
 	bank_account = (
@@ -353,6 +365,9 @@ def create_salary_journal_entry(doc, amount, sp_date):
 
 
 def create_deduction_journal_entry(doc, amount, sp_date):
+	"""
+	Create Journal Entry to record deduction payment
+	"""
 	company = doc.company
 	payroll_payable = frappe.db.get_value("Company", company, "default_payroll_payable_account")
 	bank_account = (
@@ -401,6 +416,10 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 
 
 def check_and_mark_paid(doc):
+	"""
+	check if both salary and deduction payments are done,
+	and if so mark payroll entry and salary slips as Paid
+	"""
 	if not doc.custom_salary_pe_created or not doc.custom_deduction_pe_created:
 		frappe.db.set_value("Payroll Entry", doc.name, "custom_payment_status", "Partial", update_modified=False)
 		frappe.db.commit()
@@ -449,3 +468,185 @@ def process_pending_payroll_entries():
 				"Payroll Scheduler Error",
 				frappe.get_traceback()
 			)
+@frappe.whitelist()
+def request_cancellation(payroll_id, reason):
+	"""
+	Employee requests cancellation of a payroll entry.
+	"""
+	try:
+		doc = frappe.get_doc("Payroll Entry", payroll_id)
+
+		branch = frappe.db.get_value(
+			"Branch Integration",
+			{
+				"company":               doc.company,
+				"branch_erpnext_status": "Accepted"
+			},
+			["endpoint", "token"],
+			as_dict=True
+		)
+
+		if not branch:
+			return {"status": "error", "error": "No active Branch Integration found"}
+
+		data = {
+			"payroll_id": payroll_id,
+			"action":     "cancel",
+			"reason":     reason
+		}
+
+		try:
+			requests.post(
+				branch.endpoint.rstrip("/") + "/erpnext/salary-payment/delete-payroll-payment",
+				json=data,
+				headers={
+					"Content-Type": "application/json",
+					"Accept":       "application/json",
+					"erpnexttoken": branch.token,
+					"User-Agent":   "Frappe"
+				},
+				timeout=10
+			)
+		except Exception:
+			pass
+
+		frappe.db.set_value("Payroll Entry", payroll_id, {
+			"custom_cancel_status": "Cancel Requested",
+			"custom_cancel_reason": reason,
+		}, update_modified=False)
+		frappe.db.commit()
+
+		return {"status": "success"}
+
+	except Exception as e:
+		frappe.log_error("Payroll Cancel Error", frappe.get_traceback())
+		return {"status": "error", "error": str(e)}
+
+
+@frappe.whitelist(allow_guest=True)
+def receive_cancel_response():
+	"""
+	Endpoint to receive cancellation approval/rejection from external system
+	"""
+	try:
+		data = frappe.request.get_json()
+
+		token = frappe.request.headers.get("X-Callback-Token")
+		if not token:
+			frappe.local.response.http_status_code = 401
+			return {"error": "Unauthorized"}
+
+		payroll_id = data.get("payroll_id")
+		status     = data.get("status")
+		reason     = data.get("reason", "")
+
+		if not payroll_id:
+			frappe.local.response.http_status_code = 400
+			return {"error": "Missing payroll_id"}
+
+		if status not in ["approved", "rejected"]:
+			frappe.local.response.http_status_code = 400
+			return {"error": "Invalid status. Must be approved or rejected"}
+
+		if not frappe.db.exists("Payroll Entry", payroll_id):
+			frappe.local.response.http_status_code = 404
+			return {"error": f"Payroll Entry {payroll_id} not found"}
+
+		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
+		callback_token = frappe.db.get_value(
+			"Branch Integration",
+			{
+				"company":               company,
+				"branch_erpnext_status": "Accepted"
+			},
+			"callback_token"
+		)
+
+		if not callback_token or token != callback_token:
+			frappe.local.response.http_status_code = 401
+			return {"error": "Unauthorized"}
+
+		frappe.set_user("Administrator")
+
+		if status == "approved":
+			process_cancel_approval(payroll_id)
+		elif status == "rejected":
+			process_cancel_rejection(payroll_id, reason)
+
+		return {"message": "Processed successfully"}
+
+	except Exception as e:
+		frappe.log_error("Payroll Cancel Callback Error", frappe.get_traceback())
+		frappe.local.response.http_status_code = 500
+		return {"error": str(e)}
+
+	finally:
+		frappe.set_user("Guest")
+
+
+def process_cancel_approval(payroll_id):
+	"""
+	Process cancellation approval:
+	- Cancel related Journal Entries and Salary Slips
+	- Cancel Payroll Entry
+	- Update custom fields to reflect cancellation
+	"""
+	cancel_journal_entries(payroll_id)
+
+	salary_slips = frappe.get_all(
+		"Salary Slip",
+		filters={"payroll_entry": payroll_id, "docstatus": 1},
+		pluck="name"
+	)
+	for slip_name in salary_slips:
+		try:
+			frappe.get_doc("Salary Slip", slip_name).cancel()
+		except Exception:
+			frappe.log_error("Salary Slip Cancel Error", frappe.get_traceback())
+
+	try:
+		frappe.get_doc("Payroll Entry", payroll_id).cancel()
+	except Exception:
+		frappe.log_error("Payroll Entry Cancel Error", frappe.get_traceback())
+
+	frappe.db.sql("""
+		UPDATE `tabPayroll Entry`
+		SET custom_cancel_status = 'Cancel Approved'
+		WHERE name = %s
+	""", payroll_id)
+
+	frappe.db.commit()
+
+
+def process_cancel_rejection(payroll_id, reason):
+	"""
+	Process cancellation rejection:
+	Update custom fields to reflect rejection and reason
+	"""
+	frappe.db.set_value("Payroll Entry", payroll_id, {
+		"custom_cancel_status":           "Cancel Rejected",
+		"custom_cancel_rejection_reason": reason or "No reason provided",
+	}, update_modified=False)
+	frappe.db.commit()
+
+
+def cancel_journal_entries(payroll_id):
+	"""
+	Find and cancel all Journal Entries linked to the given payroll entry
+	"""
+	journal_entries = list(set(frappe.get_all(
+		"Journal Entry Account",
+		filters={
+			"reference_type": "Payroll Entry",
+			"reference_name": payroll_id
+		},
+		pluck="parent"
+	)))
+
+	for je_name in journal_entries:
+		try:
+			je_doc = frappe.get_doc("Journal Entry", je_name)
+			if je_doc.docstatus == 1:
+				je_doc.cancel()
+		except Exception:
+			frappe.log_error("JE Cancel Error", frappe.get_traceback())
