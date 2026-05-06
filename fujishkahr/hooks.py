@@ -54,6 +54,7 @@ doctype_js = {
 	"Holiday List": "fujishkahr/custom_scripts/holiday_list/holiday_list.js",
 	"Employee Checkin": "fujishkahr/custom_scripts/employee_checkin/employee_checkin.js",
 	"Shift Assignment": "fujishkahr/custom_scripts/shift_assignment/shift_assignment.js",
+	"Payroll Entry": "fujishkahr/custom_scripts/payroll_entry/payroll_entry.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -160,7 +161,8 @@ doc_events = {
 	},
 	"Salary Slip": {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
-		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days"
+		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
+		"on_submit":     "fujishkahr.api.payroll.on_salary_slip_submit",
 	},
 	"Payment Entry": {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
@@ -185,6 +187,11 @@ scheduler_events = {
 	"daily": [
 		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
 	],
+	"cron": {
+		"*/1 * * * *": [
+			"fujishkahr.api.payroll.process_pending_payroll_entries"
+		]
+	}
 }
 
 # 	"hourly": [
