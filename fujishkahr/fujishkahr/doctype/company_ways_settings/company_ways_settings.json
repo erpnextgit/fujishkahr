@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:company",
+ "creation": "2026-05-07 10:26:45.672643",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "notification_settings_section",
+  "send_holiday_reminders",
+  "send_birthday_reminders",
+  "send_work_anniversary_reminders",
+  "send_leave_notification",
+  "frequency",
+  "column_break_vu2t",
+  "leave_notification_template",
+  "leave_approval_notification_template",
+  "leave_status_notification_template",
+  "leave_policy_section_section",
+  "approver_mandatory",
+  "prevent_self",
+  "restrict_backdated",
+  "auto_leave",
+  "col_break_2_column",
+  "show_in_calendar",
+  "expense_approver_mandatory",
+  "prevent_self_expense",
+  "attendance_section_section",
+  "standard_working_hours",
+  "allow_multiple_shift",
+  "col_break_3_column",
+  "checkin_from_mobile",
+  "allow_geolocation"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "description": "Notify employees before upcoming holidays",
+   "fieldname": "send_holiday_reminders",
+   "fieldtype": "Check",
+   "label": "Send Holiday Reminders"
+  },
+  {
+   "default": "0",
+   "description": "Send birthday wishes to employees on their birthday",
+   "fieldname": "send_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Send Birthday Reminders"
+  },
+  {
+   "default": "0",
+   "description": "Celebrate employee work milestones",
+   "fieldname": "send_work_anniversary_reminders",
+   "fieldtype": "Check",
+   "label": "Send Work Anniversary Reminders"
+  },
+  {
+   "default": "0",
+   "description": "Notify on leave status changes",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
+  },
+  {
+   "default": "Weekly",
+   "depends_on": "eval:doc.send_holiday_reminders || doc.send_birthday_reminders || doc.send_work_anniversary_reminders",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Reminder Frequency",
+   "options": "Daily\nWeekly\nMonthly"
+  },
+  {
+   "depends_on": "eval:doc.send_leave_notification",
+   "fieldname": "leave_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval:doc.send_leave_notification",
+   "fieldname": "leave_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Approval Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval:doc.send_leave_notification",
+   "fieldname": "leave_status_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Status Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "approver_mandatory",
+   "fieldtype": "Check",
+   "label": "Leave Approver Mandatory in Leave Application"
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_self",
+   "fieldtype": "Check",
+   "label": "Prevent Self Leave Approval"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_backdated",
+   "fieldtype": "Check",
+   "label": "Restrict Backdated Leave Application"
+  },
+  {
+   "default": "0",
+   "description": "Automatically encash unused leaves at year end",
+   "fieldname": "auto_leave",
+   "fieldtype": "Check",
+   "label": "Auto Leave Encashment"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_in_calendar",
+   "fieldtype": "Check",
+   "label": "Show Leaves of All Department Members in Calendar"
+  },
+  {
+   "default": "0",
+   "fieldname": "expense_approver_mandatory",
+   "fieldtype": "Check",
+   "label": "Expense Approver Mandatory in Expense Claim"
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_self_expense",
+   "fieldtype": "Check",
+   "label": "Prevent Self Expense Approval"
+  },
+  {
+   "default": "8",
+   "description": "Default working hours per day for this company",
+   "fieldname": "standard_working_hours",
+   "fieldtype": "Float",
+   "label": "Standard Working Hours"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_shift",
+   "fieldtype": "Check",
+   "label": "Allow Multiple Shift Assignments"
+  },
+  {
+   "default": "0",
+   "fieldname": "checkin_from_mobile",
+   "fieldtype": "Check",
+   "label": "Allow Employee Checkin from Mobile App"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_geolocation",
+   "fieldtype": "Check",
+   "label": "Allow Geolocation Tracking"
+  },
+  {
+   "fieldname": "notification_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Notification Settings"
+  },
+  {
+   "fieldname": "column_break_vu2t",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_policy_section_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Policy Section"
+  },
+  {
+   "fieldname": "col_break_2_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attendance_section_section",
+   "fieldtype": "Section Break",
+   "label": "Attendance Section"
+  },
+  {
+   "fieldname": "col_break_3_column",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-07 11:28:37.046381",
+ "modified_by": "Administrator",
+ "module": "Fujishkahr",
+ "name": "Company Ways Settings",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
