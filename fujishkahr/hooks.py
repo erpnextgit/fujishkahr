@@ -186,6 +186,9 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
+		"fujishkahr.hr.holiday_reminders.send_holiday_reminders",
+		"fujishkahr.hr.birthday_reminders.send_birthday_reminders",
+		"fujishkahr.hr.anniversary_reminders.send_work_anniversary_reminders",
 	],
 	"cron": {
 		"*/1 * * * *": [
