@@ -14,7 +14,6 @@
   "send_leave_notification",
   "frequency",
   "column_break_vu2t",
-  "leave_notification_template",
   "leave_approval_notification_template",
   "leave_status_notification_template",
   "leave_policy_section_section",
@@ -80,13 +79,6 @@
    "fieldtype": "Select",
    "label": "Reminder Frequency",
    "options": "Daily\nWeekly\nMonthly"
-  },
-  {
-   "depends_on": "eval:doc.send_leave_notification",
-   "fieldname": "leave_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Notification Template",
-   "options": "Email Template"
   },
   {
    "depends_on": "eval:doc.send_leave_notification",
@@ -201,7 +193,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-07 11:28:37.046381",
+ "modified": "2026-05-08 14:20:08.270850",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Company Ways Settings",
