@@ -91,12 +91,11 @@ def calculate_payroll_totals(doc):
 	for slip in salary_slips:
 		slip_doc = frappe.get_doc("Salary Slip", slip.name)
 
-		# Add net pay to total salary
 		total_salary += slip_doc.net_pay or 0
 
-		# Get employee PF and ESI from deductions
 		employee_pf  = 0
 		employee_esi = 0
+		other_deductions = 0
 
 		for row in slip_doc.deductions:
 			component = frappe.get_cached_doc(
@@ -106,26 +105,26 @@ def calculate_payroll_totals(doc):
 			if component.is_employee_pf:
 				employee_pf += row.amount or 0
 
-			if component.is_employee_esi:
+			elif component.is_employee_esi:
 				employee_esi += row.amount or 0
 
-		# Calculate employer contributions
-		# Employer PF = same as employee PF (approx 13% vs 12%)
+			else:
+				other_deductions += row.amount or 0
+
 		employer_pf = employee_pf
 
-		# Employer ESI = 3.25% of gross pay if gross <= 21000
 		employer_esi = (
 			(slip_doc.gross_pay * 0.0325)
 			if (slip_doc.gross_pay or 0) <= 21000
 			else 0
 		)
 
-		# Total deduction for this slip
 		slip_deduction = (
 			employee_pf +
 			employee_esi +
 			employer_pf +
-			employer_esi
+			employer_esi +
+			other_deductions
 		)
 
 		total_deduction += slip_deduction
@@ -451,10 +450,14 @@ def process_pending_payroll_entries():
 		filters={
 			"docstatus": 1,
 			"custom_api_pushed": 0,
-			"custom_payment_status": ""
 		},
-		pluck="name"
+		fields=["name", "custom_payment_status"],
 	)
+
+	pending_entries = [
+		e.name for e in pending_entries
+		if not e.custom_payment_status
+	]
 
 	for docname in pending_entries:
 		try:
@@ -468,6 +471,7 @@ def process_pending_payroll_entries():
 				"Payroll Scheduler Error",
 				frappe.get_traceback()
 			)
+
 @frappe.whitelist()
 def request_cancellation(payroll_id, reason):
 	"""
@@ -628,7 +632,6 @@ def process_cancel_rejection(payroll_id, reason):
 		"custom_cancel_rejection_reason": reason or "No reason provided",
 	}, update_modified=False)
 	frappe.db.commit()
-
 
 def cancel_journal_entries(payroll_id):
 	"""
