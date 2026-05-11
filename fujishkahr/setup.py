@@ -17,6 +17,7 @@ from fujishkahr.custom.custom_field.employee_advance import get_employee_advance
 from fujishkahr.custom.custom_field.additional_salary import get_additional_salary_custom_fields
 from fujishkahr.custom.custom_field.payroll_entry import get_payroll_entry_custom_fields
 from fujishkahr.custom.property_setter.salary_slip import get_salary_slip_property_setters
+from fujishkahr.custom.custom_field.email_template import get_email_template_custom_fields
 
 def after_install():
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
@@ -66,6 +67,7 @@ def get_custom_fields():
 	custom_fields.update(get_employee_advance_custom_fields())
 	custom_fields.update(get_additional_salary_custom_fields())
 	custom_fields.update(get_payroll_entry_custom_fields())
+	custom_fields.update(get_email_template_custom_fields())
 	return custom_fields
 
 def create_custom_roles(roles):
