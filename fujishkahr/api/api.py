@@ -339,8 +339,11 @@ def cancel_payment_entry(doc):
 	)
 
 def create_payment_entry(doc):
-	"""Create a Payment Entry for the approved Advance Request
-		and link it to the corresponding Employee Advance record
+	"""
+	Create a Payment Entry for the approved Advance Request
+	and link it to the corresponding Employee Advance record.
+	After payment confirmed, enable repay_unclaimed_amount_from_salary
+	so salary can now deduct the advance amount.
 	"""
 	employee_advance = frappe.db.get_value(
 		"Employee Advance",
@@ -363,7 +366,6 @@ def create_payment_entry(doc):
 	advance_doc = frappe.get_doc("Employee Advance", employee_advance)
 	company = advance_doc.company
 
-	# Get bank/cash account
 	paid_from = (
 		frappe.db.get_value("Company", company, "default_bank_account")
 		or frappe.db.get_value("Company", company, "default_cash_account")
@@ -374,37 +376,35 @@ def create_payment_entry(doc):
 		return
 
 	paid_to = advance_doc.advance_account
-
 	if not paid_to:
 		frappe.log_error("Payment Entry Error", "Advance account missing in Employee Advance")
 		return
 
-	# Account currencies
 	paid_from_currency = frappe.db.get_value("Account", paid_from, "account_currency")
-	paid_to_currency = frappe.db.get_value("Account", paid_to, "account_currency")
+	paid_to_currency   = frappe.db.get_value("Account", paid_to, "account_currency")
 
 	pe = frappe.new_doc("Payment Entry")
-	pe.payment_type = "Pay"
-	pe.party_type = "Employee"
-	pe.party = doc.employee
-	pe.company = company
-	pe.posting_date = frappe.utils.nowdate()
-	pe.paid_amount = doc.approved_amount
-	pe.received_amount = doc.approved_amount
-	pe.paid_from = paid_from
-	pe.paid_to = paid_to
-	pe.paid_from_account_currency = paid_from_currency
-	pe.paid_to_account_currency = paid_to_currency
-	pe.source_exchange_rate = 1
-	pe.target_exchange_rate = 1
-	pe.mode_of_payment = "Cash"
-	pe.reference_no = doc.name
-	pe.reference_date = frappe.utils.nowdate()
+	pe.payment_type                = "Pay"
+	pe.party_type                  = "Employee"
+	pe.party                       = doc.employee
+	pe.company                     = company
+	pe.posting_date                = frappe.utils.nowdate()
+	pe.paid_amount                 = doc.approved_amount
+	pe.received_amount             = doc.approved_amount
+	pe.paid_from                   = paid_from
+	pe.paid_to                     = paid_to
+	pe.paid_from_account_currency  = paid_from_currency
+	pe.paid_to_account_currency    = paid_to_currency
+	pe.source_exchange_rate        = 1
+	pe.target_exchange_rate        = 1
+	pe.mode_of_payment             = "Cash"
+	pe.reference_no                = doc.name
+	pe.reference_date              = frappe.utils.nowdate()
 
 	pe.append("references", {
 		"reference_doctype": "Employee Advance",
-		"reference_name": employee_advance,
-		"allocated_amount": doc.approved_amount
+		"reference_name":    employee_advance,
+		"allocated_amount":  doc.approved_amount
 	})
 
 	try:
@@ -412,7 +412,18 @@ def create_payment_entry(doc):
 		pe.submit()
 		frappe.log_error("Payment Entry Created Successfully", pe.name)
 
-	except Exception as e:
+		# Payment confirmed by Fujishka
+		# NOW enable salary repayment — employee has received the money
+		# This prevents "Return amount cannot be greater than unclaimed amount" error
+		frappe.db.set_value(
+			"Employee Advance",
+			employee_advance,
+			"repay_unclaimed_amount_from_salary", 1
+		)
+		frappe.db.commit()
+		frappe.log_error("Advance Repayment Enabled", employee_advance)
+
+	except Exception:
 		frappe.log_error("Payment Entry Creation Failed", frappe.get_traceback())
 
 def send_rejection_email(doc, reason):
