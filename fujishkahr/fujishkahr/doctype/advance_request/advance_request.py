@@ -16,8 +16,12 @@ class AdvanceRequest(Document):
 
 	def create_employee_advance(self):
 		"""
-			Creates an Employee Advance document based on the approved Advance Request.
-			Calculates exchange rate if the advance account currency differs from the company currency.
+		Creates an Employee Advance document based on the approved Advance Request.
+		repay_unclaimed_amount_from_salary is set to 0 here.
+		It will be enabled in api.py AFTER Fujishka confirms payment.
+		This prevents the error:
+		'Return amount cannot be greater than unclaimed amount'
+		which happens when salary tries to deduct before employee receives money.
 		"""
 		if not self.approved_amount or self.approved_amount <= 0:
 			frappe.throw("Approved amount must be set before creating Employee Advance.")
@@ -35,29 +39,30 @@ class AdvanceRequest(Document):
 			) or 1.0
 
 		advance = frappe.new_doc("Employee Advance")
-		advance.employee = self.employee
-		advance.employee_name  = self.employee_name
-		advance.purpose = self.purpose or "Salary Advance"
-		advance.company = self.company
-		advance.posting_date = frappe.utils.today()
-		advance.advance_amount = self.approved_amount
-		advance.advance_account = self.advance_account
-		advance.currency = account_currency
-		advance.exchange_rate = exchange_rate
-		advance.repay_unclaimed_amount_from_salary = 1
-		advance.advance_request = self.name
+		advance.employee               = self.employee
+		advance.employee_name          = self.employee_name
+		advance.purpose                = self.purpose or "Salary Advance"
+		advance.company                = self.company
+		advance.posting_date           = frappe.utils.today()
+		advance.advance_amount         = self.approved_amount
+		advance.advance_account        = self.advance_account
+		advance.currency               = account_currency
+		advance.exchange_rate          = exchange_rate
+		advance.advance_request        = self.name
+		advance.repay_unclaimed_amount_from_salary = 0
 
 		advance.insert(ignore_permissions=True)
 		advance.submit()
 
 		frappe.msgprint(
-			f"Employee Advance <a href='/app/employee-advance/{advance.name}'><b>{advance.name}</b></a> created and submitted successfully.",
+			f"Employee Advance <a href='/app/employee-advance/{advance.name}'>"
+			f"<b>{advance.name}</b></a> created and submitted successfully.",
 			alert=True
 		)
 
 	def send_approval_email(self):
 		"""
-			Sends an email notification to the employee when their advance request is approved.
+		Sends an email notification to the employee when their advance request is approved.
 		"""
 		employee_user = frappe.db.get_value("Employee", self.employee, "user_id")
 
@@ -74,10 +79,10 @@ class AdvanceRequest(Document):
 			message=f"""
 				<p>Dear {self.employee_name},</p>
 
-				<p>We are pleased to inform you that your advance request has been 
+				<p>We are pleased to inform you that your advance request has been
 				<b style="color: green;">Approved</b>.</p>
 
-				<table border="1" cellpadding="8" cellspacing="0" 
+				<table border="1" cellpadding="8" cellspacing="0"
 					   style="border-collapse: collapse; width: 100%;">
 					<tr>
 						<td><b>Request ID</b></td>
@@ -112,17 +117,20 @@ class AdvanceRequest(Document):
 @frappe.whitelist()
 def create_additional_salary(docname, data):
 	"""
-		Creates Additional Salary records for an Advance Request
-		based on the provided data.
+	Creates Additional Salary records for an Advance Request.
+	Only callable after Fujishka confirms payment (api_status = Completed).
+	Button is hidden in JS until that point.
 	"""
 	data = frappe._dict(json.loads(data))
 	doc = frappe.get_doc("Advance Request", docname)
 
-	created_docs = []
+	if doc.api_status != "Completed":
+		frappe.throw(
+			"Cannot create Additional Salary before Fujishka confirms payment. "
+			"Please wait for payment confirmation."
+		)
 
-	if frappe.db.exists("Additional Salary", {
-		"advance_request": docname
-	}):
+	if frappe.db.exists("Additional Salary", {"advance_request": docname}):
 		frappe.throw("Additional Salary already created for this Advance Request")
 
 	employee_advance = frappe.db.get_value(
@@ -134,6 +142,8 @@ def create_additional_salary(docname, data):
 	if not employee_advance:
 		frappe.throw("Employee Advance not found")
 
+	created_docs = []
+
 	if data.is_installment:
 		if not data.months or data.months <= 0:
 			frappe.throw("Number of Months must be greater than 0 for installment")
@@ -144,7 +154,6 @@ def create_additional_salary(docname, data):
 
 		for i in range(int(data.months)):
 			salary_date = add_months(getdate(data.start_month), i)
-
 			name = create_salary(
 				doc.employee,
 				data.salary_component,
@@ -160,7 +169,7 @@ def create_additional_salary(docname, data):
 		if not data.deduction_month:
 			frappe.throw("Deduction Month is required when 'Deduct Full Amount' is selected")
 
-		create_salary(
+		name = create_salary(
 			doc.employee,
 			data.salary_component,
 			data.advance_amount,
@@ -175,16 +184,17 @@ def create_additional_salary(docname, data):
 
 def create_salary(employee, component, amount, date, advance_name, company, advance_request):
 	"""
-		Helper function to create an Additional Salary record.
+	Helper function to create and submit an Additional Salary record.
 	"""
 	doc = frappe.new_doc("Additional Salary")
-	doc.employee = employee
-	doc.company = company
+	doc.employee         = employee
+	doc.company          = company
 	doc.salary_component = component
-	doc.amount = round(amount, 2)
-	doc.payroll_date = date
-	doc.ref_doctype = "Employee Advance"
-	doc.ref_docname = advance_name
-	doc.advance_request = advance_request
-	doc.insert()
+	doc.amount           = round(amount, 2)
+	doc.payroll_date     = date
+	doc.ref_doctype      = "Employee Advance"
+	doc.ref_docname      = advance_name
+	doc.advance_request  = advance_request
+	doc.insert(ignore_permissions=True)
+	doc.submit()
 	return doc.name
