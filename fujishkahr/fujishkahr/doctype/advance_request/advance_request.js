@@ -23,7 +23,15 @@ function toggle_required(frm) {
 }
 
 function create_additional_salary(frm) {
-	if (frm.doc.workflow_state === "Approved") {
+	// Only show button after Fujishka confirms payment
+	// Prevents deduction before employee receives advance
+	if (
+		(
+			frm.doc.workflow_state === "Approved" ||
+			frm.doc.workflow_state === "Paid"
+		) &&
+		frm.doc.api_status === "Completed"
+	) {
 		frm.add_custom_button(__('Create Additional Salary'), function() {
 			let d = new frappe.ui.Dialog({
 				title: 'Create Additional Salary',
@@ -109,7 +117,6 @@ function create_additional_salary(frm) {
 						fieldtype: 'Date',
 						depends_on: 'eval:doc.deduct_full == 1',
 					}
-
 				],
 				primary_action_label: 'Submit',
 				primary_action(values) {
@@ -148,7 +155,7 @@ function create_additional_salary(frm) {
 			d.fields_dict.is_installment.df.onchange = () => {
 				if (d.get_value('is_installment')) {
 					d.set_value('deduct_full', 0);
-					d.set_value('months', 0)
+					d.set_value('months', 0);
 					d.set_value('start_month', null);
 					d.set_value('monthly_amount', 0);
 				}
@@ -157,7 +164,7 @@ function create_additional_salary(frm) {
 			d.fields_dict.deduct_full.df.onchange = () => {
 				if (d.get_value('deduct_full')) {
 					d.set_value('is_installment', 0);
-					d.set_value('deduction_month', 0)
+					d.set_value('deduction_month', 0);
 				}
 			};
 
@@ -169,13 +176,12 @@ function create_additional_salary(frm) {
 				}
 			}
 		});
-
 	}
 }
 
 // Hide cancel button if document is submitted
 function hide_cancel_button(frm) {
-	if (frm.doc.docstatus === 1){
+	if (frm.doc.docstatus === 1) {
 		frm.page.btn_secondary.hide();
 	}
 }
