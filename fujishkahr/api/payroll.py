@@ -294,19 +294,35 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 
 	if sp_type == 1:
 		new_salary_paid = (doc.custom_salary_paid or 0) + amount
-		frappe.db.set_value("Payroll Entry", payroll_id, "custom_salary_paid", new_salary_paid, update_modified=False)
-		frappe.log_error("Payroll Callback Type 1", f"Salary paid so far: {new_salary_paid} / {doc.custom_total_salary}")
+		frappe.db.set_value(
+			"Payroll Entry", payroll_id,
+			"custom_salary_paid", new_salary_paid,
+			update_modified=False
+		)
+		frappe.log_error(
+			"Payroll Callback Type 1",
+			f"Salary paid so far: {new_salary_paid} / {doc.custom_total_salary}"
+		)
 		if round(new_salary_paid, 2) >= round(doc.custom_total_salary, 2):
 			if not doc.custom_salary_pe_created:
 				create_salary_journal_entry(doc, new_salary_paid, sp_date)
+				mark_salary_slips(payroll_id, "Paid")
 
 	elif sp_type == 2:
 		new_deduction_paid = (doc.custom_deduction_paid or 0) + amount
-		frappe.db.set_value("Payroll Entry", payroll_id, "custom_deduction_paid", new_deduction_paid, update_modified=False)
-		frappe.log_error("Payroll Callback Type 2", f"Deduction paid so far: {new_deduction_paid} / {doc.custom_total_deduction}")
+		frappe.db.set_value(
+			"Payroll Entry", payroll_id,
+			"custom_deduction_paid", new_deduction_paid,
+			update_modified=False
+		)
+		frappe.log_error(
+			"Payroll Callback Type 2",
+			f"Deduction paid so far: {new_deduction_paid} / {doc.custom_total_deduction}"
+		)
 		if round(new_deduction_paid, 2) >= round(doc.custom_total_deduction, 2):
 			if not doc.custom_deduction_pe_created:
 				create_deduction_journal_entry(doc, new_deduction_paid, sp_date)
+				mark_salary_slips(payroll_id, "Completed")
 
 	frappe.db.commit()
 	doc.reload()
@@ -416,28 +432,56 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 
 def check_and_mark_paid(doc):
 	"""
-	check if both salary and deduction payments are done,
-	and if so mark payroll entry and salary slips as Paid
+	Mark Payroll Entry as Paid only when
+	both salary and deduction are fully settled.
 	"""
 	if not doc.custom_salary_pe_created or not doc.custom_deduction_pe_created:
-		frappe.db.set_value("Payroll Entry", doc.name, "custom_payment_status", "Partial", update_modified=False)
+		frappe.db.set_value(
+			"Payroll Entry", doc.name,
+			"custom_payment_status", "Partial",
+			update_modified=False
+		)
 		frappe.db.commit()
 		return
 
-	frappe.db.set_value("Payroll Entry", doc.name, "custom_payment_status", "Paid", update_modified=False)
-
-	salary_slips = frappe.get_all(
-		"Salary Slip",
-		filters={"payroll_entry": doc.name, "docstatus": 1},
-		pluck="name"
+	frappe.db.set_value(
+		"Payroll Entry", doc.name,
+		"custom_payment_status", "Paid",
+		update_modified=False
+	)
+	frappe.db.commit()
+	frappe.log_error(
+		"Payroll Marked Paid",
+		f"{doc.name} fully settled"
 	)
 
+def mark_salary_slips(payroll_id, status):
+	"""
+	Mark all submitted salary slips under
+	this payroll entry with the given status.
+
+	Called twice:
+	  Type 1 paid → status = "Paid"
+		(employee received salary)
+	  Type 2 paid → status = "Completed"
+		(deductions fully settled)
+	"""
+	salary_slips = frappe.get_all(
+		"Salary Slip",
+		filters={"payroll_entry": payroll_id, "docstatus": 1},
+		pluck="name"
+	)
 	for slip_name in salary_slips:
-		frappe.db.set_value("Salary Slip", slip_name, "status", "Paid", update_modified=False)
-
+		frappe.db.set_value(
+			"Salary Slip", slip_name,
+			"status", status,
+			update_modified=False
+		)
 	frappe.db.commit()
-	frappe.log_error("Payroll Marked Paid", f"{doc.name} and {len(salary_slips)} salary slips marked as Paid")
-
+	frappe.log_error(
+		f"Salary Slips Marked {status}",
+		f"{len(salary_slips)} slips marked as {status} for {payroll_id}"
+	)
 
 def process_pending_payroll_entries():
 	"""
