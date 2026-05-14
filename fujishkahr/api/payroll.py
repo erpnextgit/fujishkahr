@@ -399,7 +399,7 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 		je.voucher_type = "Bank Entry"
 		je.company      = company
 		je.posting_date = sp_date or frappe.utils.nowdate()
-		je.user_remark  = f"Salary payment for Payroll Entry {doc.name}"
+		je.user_remark  = f"Deduction payment for Payroll Entry {doc.name}"
 		je.cheque_no    = doc.name
 		je.cheque_date  = sp_date or frappe.utils.nowdate()
 
@@ -434,6 +434,7 @@ def check_and_mark_paid(doc):
 	"""
 	Mark Payroll Entry as Paid only when
 	both salary and deduction are fully settled.
+	Salary slip status is now handled by mark_salary_slips.
 	"""
 	if not doc.custom_salary_pe_created or not doc.custom_deduction_pe_created:
 		frappe.db.set_value(
@@ -694,6 +695,157 @@ def cancel_journal_entries(payroll_id):
 		try:
 			je_doc = frappe.get_doc("Journal Entry", je_name)
 			if je_doc.docstatus == 1:
+				je_doc.cancel()
+		except Exception:
+			frappe.log_error("JE Cancel Error", frappe.get_traceback())
+
+@frappe.whitelist(allow_guest=True)
+def delete_payment():
+	"""
+	Endpoint called by Fujishka when they delete
+	a salary or deduction payment.
+	sp_type 1 = salary payment deleted
+	sp_type 2 = deduction payment deleted
+	"""
+	try:
+		data = frappe.request.get_json()
+
+		token = frappe.request.headers.get("X-API-Key")
+		if not token:
+			frappe.local.response.http_status_code = 401
+			return {"error": "Unauthorized"}
+
+		payroll_id = data.get("sp_payment_id")
+		sp_type    = data.get("sp_type")
+
+		if not payroll_id:
+			frappe.local.response.http_status_code = 400
+			return {"error": "Missing sp_payment_id"}
+
+		if sp_type not in [1, 2]:
+			frappe.local.response.http_status_code = 400
+			return {"error": "Invalid sp_type. Must be 1 or 2"}
+
+		if not frappe.db.exists("Payroll Entry", payroll_id):
+			frappe.local.response.http_status_code = 404
+			return {"error": f"Payroll Entry {payroll_id} not found"}
+
+		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
+		callback_token = frappe.db.get_value(
+			"Branch Integration",
+			{
+				"company":               company,
+				"branch_erpnext_status": "Accepted"
+			},
+			"callback_token"
+		)
+
+		if not callback_token or token != callback_token:
+			frappe.local.response.http_status_code = 401
+			return {"error": "Unauthorized"}
+
+		frappe.set_user("Administrator")
+		process_payment_deletion(payroll_id, sp_type)
+		return {"message": "Processed successfully"}
+
+	except Exception as e:
+		frappe.log_error("Payment Delete Error", frappe.get_traceback())
+		frappe.local.response.http_status_code = 500
+		return {"error": str(e)}
+
+	finally:
+		frappe.set_user("Guest")
+
+def process_payment_deletion(payroll_id, sp_type):
+	"""
+	Reset payroll fields based on which payment was deleted.
+	sp_type 1 = salary payment deleted
+	sp_type 2 = deduction payment deleted
+	After reset, Fujishka will retry via existing receive_payment API.
+	"""
+	if sp_type == 1:
+		cancel_journal_entry_by_type(payroll_id, "Salary payment")
+		frappe.db.set_value("Payroll Entry", payroll_id, {
+			"custom_salary_paid":       0,
+			"custom_salary_pe_created": 0,
+		}, update_modified=False)
+
+	elif sp_type == 2:
+		cancel_journal_entry_by_type(payroll_id, "Deduction payment")
+		frappe.db.set_value("Payroll Entry", payroll_id, {
+			"custom_deduction_paid":       0,
+			"custom_deduction_pe_created": 0,
+		}, update_modified=False)
+
+	frappe.db.commit()
+
+	doc = frappe.get_doc("Payroll Entry", payroll_id)
+	update_status_after_deletion(doc)
+
+def update_status_after_deletion(doc):
+	"""
+	After deletion check actual state of both
+	salary and deduction to set correct statuses.
+
+	Cases:
+	  both deleted                     → Pending, slips = Submitted
+	  salary deleted, deduction exists → Partial, slips = Submitted
+	  deduction deleted, salary exists → Partial, slips = Paid
+	"""
+	salary_done    = doc.custom_salary_pe_created
+	deduction_done = doc.custom_deduction_pe_created
+
+	if not salary_done and not deduction_done:
+		frappe.db.set_value(
+			"Payroll Entry", doc.name,
+			"custom_payment_status", "Pending",
+			update_modified=False
+		)
+		mark_salary_slips(doc.name, "Submitted")
+
+	elif salary_done and not deduction_done:
+		frappe.db.set_value(
+			"Payroll Entry", doc.name,
+			"custom_payment_status", "Partial",
+			update_modified=False
+		)
+		mark_salary_slips(doc.name, "Paid")
+
+	elif not salary_done and deduction_done:
+		frappe.db.set_value(
+			"Payroll Entry", doc.name,
+			"custom_payment_status", "Partial",
+			update_modified=False
+		)
+		mark_salary_slips(doc.name, "Submitted")
+
+	frappe.db.commit()
+
+def cancel_journal_entry_by_type(payroll_id, remark_contains):
+	"""
+	Find and cancel Journal Entry linked to payroll entry
+	identified by user_remark.
+
+	remark_contains:
+	  "Salary payment"    → cancels salary JE
+	  "Deduction payment" → cancels deduction JE
+	"""
+	journal_entries = frappe.get_all(
+		"Journal Entry Account",
+		filters={
+			"reference_type": "Payroll Entry",
+			"reference_name": payroll_id
+		},
+		pluck="parent"
+	)
+
+	for je_name in list(set(journal_entries)):
+		try:
+			je_doc = frappe.get_doc("Journal Entry", je_name)
+			if (
+				je_doc.docstatus == 1 and
+				remark_contains in (je_doc.user_remark or "")
+			):
 				je_doc.cancel()
 		except Exception:
 			frappe.log_error("JE Cancel Error", frappe.get_traceback())
