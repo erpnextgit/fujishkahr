@@ -36,7 +36,10 @@
   "probation_period_settings_section",
   "default_probation_period",
   "notify_probation_end_date_before",
-  "probation_end_date_notification"
+  "probation_end_date_notification",
+  "payroll_settings_section",
+  "enable_fixed_payroll_days",
+  "fixed_working_days"
  ],
  "fields": [
   {
@@ -226,12 +229,28 @@
    "fieldtype": "Link",
    "label": "Probation End Date Notification Template",
    "options": "Email Template"
+  },
+  {
+   "fieldname": "payroll_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Payroll Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_fixed_payroll_days",
+   "fieldtype": "Check",
+   "label": "Enable Fixed Payroll Days"
+  },
+  {
+   "fieldname": "fixed_working_days",
+   "fieldtype": "Int",
+   "label": "Fixed Working Days"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-14 12:29:29.505215",
+ "modified": "2026-05-14 15:48:39.050125",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Company Ways Settings",
