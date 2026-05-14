@@ -30,7 +30,9 @@
   "allow_multiple_shift",
   "col_break_3_column",
   "checkin_from_mobile",
-  "allow_geolocation"
+  "allow_geolocation",
+  "timesheet_settings_section",
+  "hide_currency_fields"
  ],
  "fields": [
   {
@@ -188,12 +190,23 @@
   {
    "fieldname": "col_break_3_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "timesheet_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Timesheet Settings "
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_currency_fields",
+   "fieldtype": "Check",
+   "label": " Hide Currency Fields"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 14:20:08.270850",
+ "modified": "2026-05-14 11:02:16.280048",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Company Ways Settings",
