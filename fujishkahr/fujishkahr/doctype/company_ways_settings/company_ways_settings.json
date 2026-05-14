@@ -32,7 +32,11 @@
   "checkin_from_mobile",
   "allow_geolocation",
   "timesheet_settings_section",
-  "hide_currency_fields"
+  "hide_currency_fields",
+  "probation_period_settings_section",
+  "default_probation_period",
+  "notify_probation_end_date_before",
+  "probation_end_date_notification"
  ],
  "fields": [
   {
@@ -201,12 +205,33 @@
    "fieldname": "hide_currency_fields",
    "fieldtype": "Check",
    "label": " Hide Currency Fields"
+  },
+  {
+   "fieldname": "probation_period_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Probation Period Settings"
+  },
+  {
+   "fieldname": "default_probation_period",
+   "fieldtype": "Int",
+   "label": "Default Probation Period"
+  },
+  {
+   "fieldname": "notify_probation_end_date_before",
+   "fieldtype": "Int",
+   "label": "Notify Probation End Date Before"
+  },
+  {
+   "fieldname": "probation_end_date_notification",
+   "fieldtype": "Link",
+   "label": "Probation End Date Notification Template",
+   "options": "Email Template"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-14 11:02:16.280048",
+ "modified": "2026-05-14 12:29:29.505215",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Company Ways Settings",

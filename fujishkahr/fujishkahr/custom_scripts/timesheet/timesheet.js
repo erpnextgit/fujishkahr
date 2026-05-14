@@ -7,7 +7,7 @@ frappe.ui.form.on("Timesheet", {
 	}
 });
 
-// Hide currency and exchange rate fields based on Fujishkahr Settings
+// Hide currency and exchange rate fields based on Company Ways Settings Settings
 function hide_currency_fields(frm) {
 	const company = frm.doc.company
 		|| frappe.defaults.get_default("company");

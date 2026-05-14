@@ -68,6 +68,9 @@ function set_probation_dates(frm) {
 	if (!frm.doc.probation_end_date) {
 		frappe.call({
 			method: "fujishkahr.fujishkahr.custom_scripts.employee.employee.get_default_probation_period",
+			args: {
+			company: frm.doc.company
+			},
 			callback: function(r) {
 				if (r.message && r.message > 0) {
 					let end_date = frappe.datetime.add_days(start_date, r.message);
