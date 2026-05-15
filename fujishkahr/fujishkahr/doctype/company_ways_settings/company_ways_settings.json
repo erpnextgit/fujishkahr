@@ -172,6 +172,7 @@
    "label": "Allow Geolocation Tracking"
   },
   {
+   "collapsible": 1,
    "fieldname": "notification_settings_section",
    "fieldtype": "Section Break",
    "label": "Notification Settings"
@@ -183,6 +184,7 @@
   {
    "fieldname": "leave_policy_section_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Leave Policy Section"
   },
   {
@@ -192,6 +194,7 @@
   {
    "fieldname": "attendance_section_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Attendance Section"
   },
   {
@@ -199,6 +202,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "timesheet_settings_section",
    "fieldtype": "Section Break",
    "label": "Timesheet Settings "
@@ -210,11 +214,13 @@
    "label": " Hide Currency Fields"
   },
   {
+   "collapsible": 1,
    "fieldname": "probation_period_settings_section",
    "fieldtype": "Section Break",
    "label": "Probation Period Settings"
   },
   {
+   "description": "(In Days)",
    "fieldname": "default_probation_period",
    "fieldtype": "Int",
    "label": "Default Probation Period"
@@ -231,6 +237,7 @@
    "options": "Email Template"
   },
   {
+   "collapsible": 1,
    "fieldname": "payroll_settings_section",
    "fieldtype": "Section Break",
    "label": "Payroll Settings"
@@ -250,7 +257,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-14 15:48:39.050125",
+ "modified": "2026-05-15 10:40:51.988394",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Company Ways Settings",

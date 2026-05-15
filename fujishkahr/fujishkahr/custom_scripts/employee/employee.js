@@ -78,7 +78,7 @@ function set_probation_dates(frm) {
 				} else {
 					frappe.msgprint({
 						title: __('Missing Data'),
-						message: __('Default Probation Period is not set in Fujishkahr Settings.'),
+						message: __('Default Probation Period is not set in Company Ways Settings.'),
 						indicator: 'red'
 					});
 					frm.set_value('probation_end_date', null);
