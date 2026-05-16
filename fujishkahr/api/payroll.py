@@ -282,7 +282,6 @@ def receive_payment():
 	finally:
 		frappe.set_user("Guest")
 
-
 def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 	"""
 	Update the payroll entry based on payment callback:
@@ -299,10 +298,6 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 			"custom_salary_paid", new_salary_paid,
 			update_modified=False
 		)
-		frappe.log_error(
-			"Payroll Callback Type 1",
-			f"Salary paid so far: {new_salary_paid} / {doc.custom_total_salary}"
-		)
 		if round(new_salary_paid, 2) >= round(doc.custom_total_salary, 2):
 			if not doc.custom_salary_pe_created:
 				create_salary_journal_entry(doc, new_salary_paid, sp_date)
@@ -315,14 +310,9 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 			"custom_deduction_paid", new_deduction_paid,
 			update_modified=False
 		)
-		frappe.log_error(
-			"Payroll Callback Type 2",
-			f"Deduction paid so far: {new_deduction_paid} / {doc.custom_total_deduction}"
-		)
 		if round(new_deduction_paid, 2) >= round(doc.custom_total_deduction, 2):
 			if not doc.custom_deduction_pe_created:
 				create_deduction_journal_entry(doc, new_deduction_paid, sp_date)
-				mark_salary_slips(payroll_id, "Completed")
 
 	frappe.db.commit()
 	doc.reload()
@@ -432,9 +422,8 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 
 def check_and_mark_paid(doc):
 	"""
-	Mark Payroll Entry as Paid only when
-	both salary and deduction are fully settled.
-	Salary slip status is now handled by mark_salary_slips.
+	Mark Payroll Entry as Paid only when both settled.
+	Mark Salary Slips as Completed only when both settled.
 	"""
 	if not doc.custom_salary_pe_created or not doc.custom_deduction_pe_created:
 		frappe.db.set_value(
@@ -451,10 +440,8 @@ def check_and_mark_paid(doc):
 		update_modified=False
 	)
 	frappe.db.commit()
-	frappe.log_error(
-		"Payroll Marked Paid",
-		f"{doc.name} fully settled"
-	)
+
+	mark_salary_slips(doc.name, "Completed")
 
 def mark_salary_slips(payroll_id, status):
 	"""
