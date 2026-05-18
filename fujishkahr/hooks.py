@@ -174,6 +174,9 @@ doc_events = {
 	"Branch": {
 		"before_insert": "fujishkahr.fujishkahr.custom_scripts.branch.branch.set_branch_name",
 	},
+	"Payroll Entry": {
+		"before_cancel": "fujishkahr.api.payroll.before_payroll_cancel",
+	},
 }
 
 # Scheduled Tasks

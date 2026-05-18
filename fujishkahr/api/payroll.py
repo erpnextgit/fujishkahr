@@ -836,3 +836,14 @@ def cancel_journal_entry_by_type(payroll_id, remark_contains):
 				je_doc.cancel()
 		except Exception:
 			frappe.log_error("JE Cancel Error", frappe.get_traceback())
+
+def before_payroll_cancel(doc, method):
+	if doc.custom_api_pushed:
+		frappe.throw(
+			msg=(
+				"Please use the <b>Request Cancellation</b> button "
+				"on the Payroll Entry form instead of cancelling directly. "
+				"This entry has already been sent to the external payment system."
+			),
+			title="Use Request Cancellation Button",
+		)
