@@ -564,31 +564,42 @@ def receive_cancel_response():
 	"""
 	Endpoint to receive cancellation approval/rejection from external system
 	"""
+	frappe.log_error("Cancel Response Hit", "endpoint was called")
 	try:
+		frappe.log_error("Cancel Response Step 1", "before get_json")
 		data = frappe.request.get_json()
+		frappe.log_error("Cancel Response Step 2", str(data))
 
 		token = frappe.request.headers.get("X-Callback-Token")
+		frappe.log_error("Cancel Response Step 3", f"token: {token}")
+
 		if not token:
+			frappe.log_error("Cancel Response Step 4", "no token - returning 401")
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
 		payroll_id = data.get("payroll_id")
 		status     = data.get("status")
 		reason     = data.get("reason", "")
+		frappe.log_error("Cancel Response Step 4", f"payroll_id: {payroll_id}, status: {status}")
 
 		if not payroll_id:
 			frappe.local.response.http_status_code = 400
 			return {"error": "Missing payroll_id"}
 
 		if status not in ["approved", "rejected"]:
+			frappe.log_error("Cancel Response Step 5", f"invalid status: {status}")
 			frappe.local.response.http_status_code = 400
 			return {"error": "Invalid status. Must be approved or rejected"}
 
 		if not frappe.db.exists("Payroll Entry", payroll_id):
+			frappe.log_error("Cancel Response Step 5", f"payroll entry not found: {payroll_id}")
 			frappe.local.response.http_status_code = 404
 			return {"error": f"Payroll Entry {payroll_id} not found"}
 
 		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
+		frappe.log_error("Cancel Response Step 5", f"company: {company}")
+
 		callback_token = frappe.db.get_value(
 			"Branch Integration",
 			{
@@ -597,18 +608,31 @@ def receive_cancel_response():
 			},
 			"callback_token"
 		)
+		frappe.log_error("Cancel Response Step 6", f"callback_token: {callback_token}, match: {token == callback_token}")
 
 		if not callback_token or token != callback_token:
+			frappe.log_error("Cancel Response Step 7", "token mismatch - returning 401")
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
+		frappe.log_error("Cancel Response Step 8", "token verified, processing...")
 		frappe.set_user("Administrator")
 
 		if status == "approved":
+			frappe.log_error("Cancel Response Step 9", "calling process_cancel_approval")
+			frappe.db.sql("""
+				UPDATE `tabPayroll Entry`
+				SET custom_cancel_status = 'Cancel Approved'
+				WHERE name = %s
+			""", payroll_id)
+			frappe.db.commit()
 			process_cancel_approval(payroll_id)
+
 		elif status == "rejected":
+			frappe.log_error("Cancel Response Step 9", "calling process_cancel_rejection")
 			process_cancel_rejection(payroll_id, reason)
 
+		frappe.log_error("Cancel Response Step 10", "done")
 		return {"message": "Processed successfully"}
 
 	except Exception as e:
@@ -619,13 +643,17 @@ def receive_cancel_response():
 	finally:
 		frappe.set_user("Guest")
 
-
 def process_cancel_approval(payroll_id):
 	"""
 	Process cancellation approval:
 	- Cancel related Journal Entries and Salary Slips
 	- Cancel Payroll Entry
 	- Update custom fields to reflect cancellation
+	
+	Called in 2 cases:
+	1. Payroll was not accepted on their side → they cancel directly and call us
+	2. Payroll was accepted → they delete their JE first, then call us
+	In both cases, our logic is the same.
 	"""
 	cancel_journal_entries(payroll_id)
 
@@ -640,31 +668,46 @@ def process_cancel_approval(payroll_id):
 		except Exception:
 			frappe.log_error("Salary Slip Cancel Error", frappe.get_traceback())
 
-	try:
-		frappe.get_doc("Payroll Entry", payroll_id).cancel()
-	except Exception:
-		frappe.log_error("Payroll Entry Cancel Error", frappe.get_traceback())
-
+	# Reset api_pushed BEFORE cancel so before_payroll_cancel hook doesn't block
 	frappe.db.sql("""
 		UPDATE `tabPayroll Entry`
-		SET custom_cancel_status = 'Cancel Approved'
+		SET custom_api_pushed = 0
 		WHERE name = %s
 	""", payroll_id)
-
 	frappe.db.commit()
 
+	# Only cancel if still submitted
+	pe_docstatus = frappe.db.get_value("Payroll Entry", payroll_id, "docstatus")
+	if pe_docstatus == 1:
+		try:
+			frappe.get_doc("Payroll Entry", payroll_id).cancel()
+		except Exception:
+			frappe.log_error("Payroll Entry Cancel Error", frappe.get_traceback())
+
+	# Always update cancel status regardless
+	frappe.db.sql("""
+		UPDATE `tabPayroll Entry`
+		SET
+			custom_cancel_status = 'Cancel Approved',
+			custom_cancel_rejection_reason = ''
+		WHERE name = %s
+	""", payroll_id)
+	frappe.db.commit()
 
 def process_cancel_rejection(payroll_id, reason):
 	"""
 	Process cancellation rejection:
 	Update custom fields to reflect rejection and reason
 	"""
-	frappe.db.set_value("Payroll Entry", payroll_id, {
-		"custom_cancel_status":           "Cancel Rejected",
-		"custom_cancel_rejection_reason": reason or "No reason provided",
-	}, update_modified=False)
+	frappe.db.sql("""
+		UPDATE `tabPayroll Entry`
+		SET
+			custom_cancel_status = 'Cancel Rejected',
+			custom_cancel_rejection_reason = %s
+		WHERE name = %s
+	""", (reason or "No reason provided", payroll_id))
 	frappe.db.commit()
-
+	
 def cancel_journal_entries(payroll_id):
 	"""
 	Find and cancel all Journal Entries linked to the given payroll entry
@@ -688,30 +731,21 @@ def cancel_journal_entries(payroll_id):
 
 @frappe.whitelist(allow_guest=True)
 def delete_payment():
-	"""
-	Endpoint called by Fujishka when they delete
-	a salary or deduction payment.
-	sp_type 1 = salary payment deleted
-	sp_type 2 = deduction payment deleted
-	"""
 	try:
 		data = frappe.request.get_json()
+		frappe.log_error("Payment Delete Received", str(data))
 
 		token = frappe.request.headers.get("X-API-Key")
 		if not token:
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
-		payroll_id = data.get("sp_payment_id")
-		sp_type    = data.get("sp_type")
+		payroll_id = data.get("payroll_id") or data.get("sp_payment_id")
+		sp_type    = data.get("sp_type")  # may be None
 
 		if not payroll_id:
 			frappe.local.response.http_status_code = 400
-			return {"error": "Missing sp_payment_id"}
-
-		if sp_type not in [1, 2]:
-			frappe.local.response.http_status_code = 400
-			return {"error": "Invalid sp_type. Must be 1 or 2"}
+			return {"error": "Missing payroll_id"}
 
 		if not frappe.db.exists("Payroll Entry", payroll_id):
 			frappe.local.response.http_status_code = 404
@@ -720,10 +754,7 @@ def delete_payment():
 		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
 		callback_token = frappe.db.get_value(
 			"Branch Integration",
-			{
-				"company":               company,
-				"branch_erpnext_status": "Accepted"
-			},
+			{"company": company, "branch_erpnext_status": "Accepted"},
 			"callback_token"
 		)
 
@@ -732,8 +763,22 @@ def delete_payment():
 			return {"error": "Unauthorized"}
 
 		frappe.set_user("Administrator")
-		process_payment_deletion(payroll_id, sp_type)
-		return {"message": "Processed successfully"}
+
+		if sp_type in [1, 2]:
+			process_payment_deletion(payroll_id, sp_type)
+		else:
+			frappe.log_error("Delete Payment - Full Cancel", f"No sp_type for {payroll_id}, going to process_cancel_approval")
+			frappe.db.sql("""
+				UPDATE `tabPayroll Entry`
+				SET
+					custom_cancel_status = 'Cancel Approved',
+					custom_cancel_rejection_reason = ''
+				WHERE name = %s
+			""", payroll_id)
+			frappe.db.commit()
+			frappe.log_error("Delete Payment - SQL Done", f"Status updated for {payroll_id}")
+			process_cancel_approval(payroll_id)
+			frappe.log_error("Delete Payment - Cancel Done", f"process_cancel_approval completed for {payroll_id}")
 
 	except Exception as e:
 		frappe.log_error("Payment Delete Error", frappe.get_traceback())
@@ -838,12 +883,14 @@ def cancel_journal_entry_by_type(payroll_id, remark_contains):
 			frappe.log_error("JE Cancel Error", frappe.get_traceback())
 
 def before_payroll_cancel(doc, method):
-	if doc.custom_api_pushed:
-		frappe.throw(
-			msg=(
-				"Please use the <b>Request Cancellation</b> button "
-				"on the Payroll Entry form instead of cancelling directly. "
-				"This entry has already been sent to the external payment system."
-			),
-			title="Use Request Cancellation Button",
-		)
+	if not doc.custom_api_pushed:
+		return
+
+	frappe.throw(
+		msg=(
+			"Please use the <b>Request Cancellation</b> button "
+			"on the Payroll Entry form instead of cancelling directly. "
+			"This entry has already been sent to the external payment system."
+		),
+		title="Use Request Cancellation Button",
+	)
