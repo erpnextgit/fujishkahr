@@ -894,3 +894,27 @@ def before_payroll_cancel(doc, method):
 		),
 		title="Use Request Cancellation Button",
 	)
+
+def reset_amended_payroll_fields(doc, method):
+	"""
+	When a Payroll Entry is amended, reset all custom fields related
+	to payment status and amounts, so that it goes through the process again.
+	"""
+	if not doc.amended_from:
+		return
+
+	doc.custom_api_pushed = 0
+	doc.custom_payment_status = ""
+
+	doc.custom_salary_paid = 0
+	doc.custom_deduction_paid = 0
+
+	doc.custom_salary_pe_created = 0
+	doc.custom_deduction_pe_created = 0
+
+	doc.custom_total_salary = 0
+	doc.custom_total_deduction = 0
+
+	doc.custom_cancel_status = ""
+	doc.custom_cancel_reason = ""
+	doc.custom_cancel_rejection_reason = ""
