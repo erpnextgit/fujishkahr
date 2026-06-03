@@ -25,11 +25,6 @@ def on_salary_slip_submit(doc, method):
 		}
 	)
 
-	frappe.log_error(
-		"Payroll Slip Check",
-		f"{submitted_slips} of {total_employees} slips submitted for {doc.payroll_entry}"
-	)
-
 def process_payroll_submission(docname):
 	"""
 	Background job:
@@ -168,8 +163,6 @@ def push_to_external_system(doc, total_salary, total_deduction):
 		"deduction":  total_deduction,
 	}
 
-	frappe.log_error("Payroll API Request", str(data))
-
 	try:
 		response = requests.post(
 			branch.endpoint.rstrip("/") + "/erpnext/salary-payment/create_salarys_payment",
@@ -182,8 +175,6 @@ def push_to_external_system(doc, total_salary, total_deduction):
 			},
 			timeout=10
 		)
-
-		frappe.log_error("Payroll API Response", response.text)
 
 		if response.status_code != 200:
 			frappe.db.set_value(
@@ -220,8 +211,6 @@ def receive_payment():
 	"""
 	try:
 		data = frappe.request.get_json()
-		frappe.log_error("Payroll Callback Received", str(data))
-
 		token = frappe.request.headers.get("X-API-Key")
 		if not token:
 			frappe.local.response.http_status_code = 401
@@ -318,7 +307,6 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 	doc.reload()
 	check_and_mark_paid(doc)
 
-
 def create_salary_journal_entry(doc, amount, sp_date):
 	"""
 	Create Journal Entry to record salary payment
@@ -361,13 +349,11 @@ def create_salary_journal_entry(doc, amount, sp_date):
 
 		je.insert(ignore_permissions=True)
 		je.submit()
-		frappe.log_error("Salary JE Created", je.name)
 		frappe.db.set_value("Payroll Entry", doc.name, "custom_salary_pe_created", 1, update_modified=False)
 		frappe.db.commit()
 
 	except Exception:
 		frappe.log_error("Salary JE Creation Failed", frappe.get_traceback())
-
 
 def create_deduction_journal_entry(doc, amount, sp_date):
 	"""
@@ -412,7 +398,6 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 
 		je.insert(ignore_permissions=True)
 		je.submit()
-		frappe.log_error("Deduction JE Created", je.name)
 		frappe.db.set_value("Payroll Entry", doc.name, "custom_deduction_pe_created", 1, update_modified=False)
 		frappe.db.commit()
 
@@ -466,10 +451,6 @@ def mark_salary_slips(payroll_id, status):
 			update_modified=False
 		)
 	frappe.db.commit()
-	frappe.log_error(
-		f"Salary Slips Marked {status}",
-		f"{len(salary_slips)} slips marked as {status} for {payroll_id}"
-	)
 
 def process_pending_payroll_entries():
 	"""
@@ -493,10 +474,6 @@ def process_pending_payroll_entries():
 
 	for docname in pending_entries:
 		try:
-			frappe.log_error(
-				"Payroll Scheduler",
-				f"Processing pending payroll entry: {docname}"
-			)
 			process_payroll_submission(docname)
 		except Exception:
 			frappe.log_error(
@@ -564,42 +541,31 @@ def receive_cancel_response():
 	"""
 	Endpoint to receive cancellation approval/rejection from external system
 	"""
-	frappe.log_error("Cancel Response Hit", "endpoint was called")
 	try:
-		frappe.log_error("Cancel Response Step 1", "before get_json")
 		data = frappe.request.get_json()
-		frappe.log_error("Cancel Response Step 2", str(data))
 
 		token = frappe.request.headers.get("X-Callback-Token")
-		frappe.log_error("Cancel Response Step 3", f"token: {token}")
-
 		if not token:
-			frappe.log_error("Cancel Response Step 4", "no token - returning 401")
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
 		payroll_id = data.get("payroll_id")
 		status     = data.get("status")
 		reason     = data.get("reason", "")
-		frappe.log_error("Cancel Response Step 4", f"payroll_id: {payroll_id}, status: {status}")
 
 		if not payroll_id:
 			frappe.local.response.http_status_code = 400
 			return {"error": "Missing payroll_id"}
 
 		if status not in ["approved", "rejected"]:
-			frappe.log_error("Cancel Response Step 5", f"invalid status: {status}")
 			frappe.local.response.http_status_code = 400
 			return {"error": "Invalid status. Must be approved or rejected"}
 
 		if not frappe.db.exists("Payroll Entry", payroll_id):
-			frappe.log_error("Cancel Response Step 5", f"payroll entry not found: {payroll_id}")
 			frappe.local.response.http_status_code = 404
 			return {"error": f"Payroll Entry {payroll_id} not found"}
 
 		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
-		frappe.log_error("Cancel Response Step 5", f"company: {company}")
-
 		callback_token = frappe.db.get_value(
 			"Branch Integration",
 			{
@@ -608,18 +574,14 @@ def receive_cancel_response():
 			},
 			"callback_token"
 		)
-		frappe.log_error("Cancel Response Step 6", f"callback_token: {callback_token}, match: {token == callback_token}")
 
 		if not callback_token or token != callback_token:
-			frappe.log_error("Cancel Response Step 7", "token mismatch - returning 401")
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
-		frappe.log_error("Cancel Response Step 8", "token verified, processing...")
 		frappe.set_user("Administrator")
 
 		if status == "approved":
-			frappe.log_error("Cancel Response Step 9", "calling process_cancel_approval")
 			frappe.db.sql("""
 				UPDATE `tabPayroll Entry`
 				SET custom_cancel_status = 'Cancel Approved'
@@ -629,10 +591,8 @@ def receive_cancel_response():
 			process_cancel_approval(payroll_id)
 
 		elif status == "rejected":
-			frappe.log_error("Cancel Response Step 9", "calling process_cancel_rejection")
 			process_cancel_rejection(payroll_id, reason)
 
-		frappe.log_error("Cancel Response Step 10", "done")
 		return {"message": "Processed successfully"}
 
 	except Exception as e:
@@ -668,23 +628,18 @@ def process_cancel_approval(payroll_id):
 		except Exception:
 			frappe.log_error("Salary Slip Cancel Error", frappe.get_traceback())
 
-	# Reset api_pushed BEFORE cancel so before_payroll_cancel hook doesn't block
-	frappe.db.sql("""
-		UPDATE `tabPayroll Entry`
-		SET custom_api_pushed = 0
-		WHERE name = %s
-	""", payroll_id)
+	frappe.db.set_value(
+		"Payroll Entry", payroll_id,
+		"custom_api_pushed", 0,
+		update_modified=False
+	)
 	frappe.db.commit()
 
-	# Only cancel if still submitted
-	pe_docstatus = frappe.db.get_value("Payroll Entry", payroll_id, "docstatus")
-	if pe_docstatus == 1:
-		try:
-			frappe.get_doc("Payroll Entry", payroll_id).cancel()
-		except Exception:
-			frappe.log_error("Payroll Entry Cancel Error", frappe.get_traceback())
+	try:
+		frappe.get_doc("Payroll Entry", payroll_id).cancel()
+	except Exception:
+		frappe.log_error("Payroll Entry Cancel Error", frappe.get_traceback())
 
-	# Always update cancel status regardless
 	frappe.db.sql("""
 		UPDATE `tabPayroll Entry`
 		SET
@@ -733,15 +688,13 @@ def cancel_journal_entries(payroll_id):
 def delete_payment():
 	try:
 		data = frappe.request.get_json()
-		frappe.log_error("Payment Delete Received", str(data))
-
 		token = frappe.request.headers.get("X-API-Key")
 		if not token:
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
 		payroll_id = data.get("payroll_id") or data.get("sp_payment_id")
-		sp_type    = data.get("sp_type")  # may be None
+		sp_type    = data.get("sp_type")
 
 		if not payroll_id:
 			frappe.local.response.http_status_code = 400
@@ -767,18 +720,9 @@ def delete_payment():
 		if sp_type in [1, 2]:
 			process_payment_deletion(payroll_id, sp_type)
 		else:
-			frappe.log_error("Delete Payment - Full Cancel", f"No sp_type for {payroll_id}, going to process_cancel_approval")
-			frappe.db.sql("""
-				UPDATE `tabPayroll Entry`
-				SET
-					custom_cancel_status = 'Cancel Approved',
-					custom_cancel_rejection_reason = ''
-				WHERE name = %s
-			""", payroll_id)
-			frappe.db.commit()
-			frappe.log_error("Delete Payment - SQL Done", f"Status updated for {payroll_id}")
 			process_cancel_approval(payroll_id)
-			frappe.log_error("Delete Payment - Cancel Done", f"process_cancel_approval completed for {payroll_id}")
+
+		return {"message": "Processed successfully"}
 
 	except Exception as e:
 		frappe.log_error("Payment Delete Error", frappe.get_traceback())
