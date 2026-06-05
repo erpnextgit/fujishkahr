@@ -37,10 +37,6 @@ def process_payroll_submission(docname):
 	total_salary, total_deduction = calculate_payroll_totals(doc)
 
 	if not total_salary:
-		frappe.log_error(
-			"Payroll Submission Error",
-			f"No salary amount calculated for {docname}"
-		)
 		return
 
 	# Step 2 - Store in custom fields
@@ -74,10 +70,6 @@ def calculate_payroll_totals(doc):
 	)
 
 	if not salary_slips:
-		frappe.log_error(
-			"Payroll Totals Error",
-			f"No submitted salary slips found for {doc.name}"
-		)
 		return 0, 0
 
 	total_salary    = 0
