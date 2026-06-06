@@ -201,7 +201,7 @@ def payment_callback():
 		# Validate required fields
 		advance_request = data.get("advance_request")
 		status          = data.get("status")
-		reason          = data.get("reason")
+		reason          = data.get("reject_reason")
 
 		if not advance_request:
 			frappe.local.response.http_status_code = 400

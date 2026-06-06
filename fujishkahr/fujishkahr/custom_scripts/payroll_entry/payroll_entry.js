@@ -1,5 +1,6 @@
 frappe.ui.form.on('Payroll Entry', {
 	refresh: function(frm) {
+		show_cancel_status_message(frm);
 
 		if (frm.doc.docstatus === 1 && frm.doc.custom_api_pushed === 1) {
 			frm.page.btn_secondary.hide();
@@ -58,5 +59,25 @@ frappe.ui.form.on('Payroll Entry', {
 				);
 			}, __('Actions'));
 		}
-	}
+	},
+	custom_cancel_status(frm) {
+		show_cancel_status_message(frm);
+	},
 });
+
+function show_cancel_status_message(frm) {
+	frm.dashboard.clear_headline();
+
+	const status = frm.doc.custom_cancel_status;
+	const reason = frm.doc.custom_cancel_reason || "";
+	const rejection_reason = frm.doc.custom_cancel_rejection_reason || "";
+
+if (rejection_reason) {
+	frm.dashboard.set_headline(
+		`<span style="color: #060659;">
+			<b>Cancellation Rejected</b> — ${rejection_reason}.
+			You can cancel this payroll by deleting the referenced journal entry.
+		</span>`
+	);
+}
+}

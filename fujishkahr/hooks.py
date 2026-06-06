@@ -176,6 +176,7 @@ doc_events = {
 	},
 	"Payroll Entry": {
 		"before_cancel": "fujishkahr.api.payroll.before_payroll_cancel",
+		"validate": "fujishkahr.api.payroll.reset_amended_payroll_fields",
 	},
 }
 

@@ -25,11 +25,6 @@ def on_salary_slip_submit(doc, method):
 		}
 	)
 
-	frappe.log_error(
-		"Payroll Slip Check",
-		f"{submitted_slips} of {total_employees} slips submitted for {doc.payroll_entry}"
-	)
-
 def process_payroll_submission(docname):
 	"""
 	Background job:
@@ -42,10 +37,6 @@ def process_payroll_submission(docname):
 	total_salary, total_deduction = calculate_payroll_totals(doc)
 
 	if not total_salary:
-		frappe.log_error(
-			"Payroll Submission Error",
-			f"No salary amount calculated for {docname}"
-		)
 		return
 
 	# Step 2 - Store in custom fields
@@ -79,10 +70,6 @@ def calculate_payroll_totals(doc):
 	)
 
 	if not salary_slips:
-		frappe.log_error(
-			"Payroll Totals Error",
-			f"No submitted salary slips found for {doc.name}"
-		)
 		return 0, 0
 
 	total_salary    = 0
@@ -168,8 +155,6 @@ def push_to_external_system(doc, total_salary, total_deduction):
 		"deduction":  total_deduction,
 	}
 
-	frappe.log_error("Payroll API Request", str(data))
-
 	try:
 		response = requests.post(
 			branch.endpoint.rstrip("/") + "/erpnext/salary-payment/create_salarys_payment",
@@ -182,8 +167,6 @@ def push_to_external_system(doc, total_salary, total_deduction):
 			},
 			timeout=10
 		)
-
-		frappe.log_error("Payroll API Response", response.text)
 
 		if response.status_code != 200:
 			frappe.db.set_value(
@@ -220,8 +203,6 @@ def receive_payment():
 	"""
 	try:
 		data = frappe.request.get_json()
-		frappe.log_error("Payroll Callback Received", str(data))
-
 		token = frappe.request.headers.get("X-API-Key")
 		if not token:
 			frappe.local.response.http_status_code = 401
@@ -318,7 +299,6 @@ def process_payment_callback(payroll_id, sp_type, amount, sp_date):
 	doc.reload()
 	check_and_mark_paid(doc)
 
-
 def create_salary_journal_entry(doc, amount, sp_date):
 	"""
 	Create Journal Entry to record salary payment
@@ -361,13 +341,11 @@ def create_salary_journal_entry(doc, amount, sp_date):
 
 		je.insert(ignore_permissions=True)
 		je.submit()
-		frappe.log_error("Salary JE Created", je.name)
 		frappe.db.set_value("Payroll Entry", doc.name, "custom_salary_pe_created", 1, update_modified=False)
 		frappe.db.commit()
 
 	except Exception:
 		frappe.log_error("Salary JE Creation Failed", frappe.get_traceback())
-
 
 def create_deduction_journal_entry(doc, amount, sp_date):
 	"""
@@ -412,7 +390,6 @@ def create_deduction_journal_entry(doc, amount, sp_date):
 
 		je.insert(ignore_permissions=True)
 		je.submit()
-		frappe.log_error("Deduction JE Created", je.name)
 		frappe.db.set_value("Payroll Entry", doc.name, "custom_deduction_pe_created", 1, update_modified=False)
 		frappe.db.commit()
 
@@ -466,10 +443,6 @@ def mark_salary_slips(payroll_id, status):
 			update_modified=False
 		)
 	frappe.db.commit()
-	frappe.log_error(
-		f"Salary Slips Marked {status}",
-		f"{len(salary_slips)} slips marked as {status} for {payroll_id}"
-	)
 
 def process_pending_payroll_entries():
 	"""
@@ -493,10 +466,6 @@ def process_pending_payroll_entries():
 
 	for docname in pending_entries:
 		try:
-			frappe.log_error(
-				"Payroll Scheduler",
-				f"Processing pending payroll entry: {docname}"
-			)
 			process_payroll_submission(docname)
 		except Exception:
 			frappe.log_error(
@@ -605,7 +574,14 @@ def receive_cancel_response():
 		frappe.set_user("Administrator")
 
 		if status == "approved":
+			frappe.db.sql("""
+				UPDATE `tabPayroll Entry`
+				SET custom_cancel_status = 'Cancel Approved'
+				WHERE name = %s
+			""", payroll_id)
+			frappe.db.commit()
 			process_cancel_approval(payroll_id)
+
 		elif status == "rejected":
 			process_cancel_rejection(payroll_id, reason)
 
@@ -619,13 +595,17 @@ def receive_cancel_response():
 	finally:
 		frappe.set_user("Guest")
 
-
 def process_cancel_approval(payroll_id):
 	"""
 	Process cancellation approval:
 	- Cancel related Journal Entries and Salary Slips
 	- Cancel Payroll Entry
 	- Update custom fields to reflect cancellation
+	
+	Called in 2 cases:
+	1. Payroll was not accepted on their side → they cancel directly and call us
+	2. Payroll was accepted → they delete their JE first, then call us
+	In both cases, our logic is the same.
 	"""
 	cancel_journal_entries(payroll_id)
 
@@ -640,6 +620,13 @@ def process_cancel_approval(payroll_id):
 		except Exception:
 			frappe.log_error("Salary Slip Cancel Error", frappe.get_traceback())
 
+	frappe.db.set_value(
+		"Payroll Entry", payroll_id,
+		"custom_api_pushed", 0,
+		update_modified=False
+	)
+	frappe.db.commit()
+
 	try:
 		frappe.get_doc("Payroll Entry", payroll_id).cancel()
 	except Exception:
@@ -647,24 +634,27 @@ def process_cancel_approval(payroll_id):
 
 	frappe.db.sql("""
 		UPDATE `tabPayroll Entry`
-		SET custom_cancel_status = 'Cancel Approved'
+		SET
+			custom_cancel_status = 'Cancel Approved',
+			custom_cancel_rejection_reason = ''
 		WHERE name = %s
 	""", payroll_id)
-
 	frappe.db.commit()
-
 
 def process_cancel_rejection(payroll_id, reason):
 	"""
 	Process cancellation rejection:
 	Update custom fields to reflect rejection and reason
 	"""
-	frappe.db.set_value("Payroll Entry", payroll_id, {
-		"custom_cancel_status":           "Cancel Rejected",
-		"custom_cancel_rejection_reason": reason or "No reason provided",
-	}, update_modified=False)
+	frappe.db.sql("""
+		UPDATE `tabPayroll Entry`
+		SET
+			custom_cancel_status = 'Cancel Rejected',
+			custom_cancel_rejection_reason = %s
+		WHERE name = %s
+	""", (reason or "No reason provided", payroll_id))
 	frappe.db.commit()
-
+	
 def cancel_journal_entries(payroll_id):
 	"""
 	Find and cancel all Journal Entries linked to the given payroll entry
@@ -688,30 +678,19 @@ def cancel_journal_entries(payroll_id):
 
 @frappe.whitelist(allow_guest=True)
 def delete_payment():
-	"""
-	Endpoint called by Fujishka when they delete
-	a salary or deduction payment.
-	sp_type 1 = salary payment deleted
-	sp_type 2 = deduction payment deleted
-	"""
 	try:
 		data = frappe.request.get_json()
-
 		token = frappe.request.headers.get("X-API-Key")
 		if not token:
 			frappe.local.response.http_status_code = 401
 			return {"error": "Unauthorized"}
 
-		payroll_id = data.get("sp_payment_id")
+		payroll_id = data.get("payroll_id") or data.get("sp_payment_id")
 		sp_type    = data.get("sp_type")
 
 		if not payroll_id:
 			frappe.local.response.http_status_code = 400
-			return {"error": "Missing sp_payment_id"}
-
-		if sp_type not in [1, 2]:
-			frappe.local.response.http_status_code = 400
-			return {"error": "Invalid sp_type. Must be 1 or 2"}
+			return {"error": "Missing payroll_id"}
 
 		if not frappe.db.exists("Payroll Entry", payroll_id):
 			frappe.local.response.http_status_code = 404
@@ -720,10 +699,7 @@ def delete_payment():
 		company = frappe.db.get_value("Payroll Entry", payroll_id, "company")
 		callback_token = frappe.db.get_value(
 			"Branch Integration",
-			{
-				"company":               company,
-				"branch_erpnext_status": "Accepted"
-			},
+			{"company": company, "branch_erpnext_status": "Accepted"},
 			"callback_token"
 		)
 
@@ -732,7 +708,12 @@ def delete_payment():
 			return {"error": "Unauthorized"}
 
 		frappe.set_user("Administrator")
-		process_payment_deletion(payroll_id, sp_type)
+
+		if sp_type in [1, 2]:
+			process_payment_deletion(payroll_id, sp_type)
+		else:
+			process_cancel_approval(payroll_id)
+
 		return {"message": "Processed successfully"}
 
 	except Exception as e:
@@ -838,12 +819,38 @@ def cancel_journal_entry_by_type(payroll_id, remark_contains):
 			frappe.log_error("JE Cancel Error", frappe.get_traceback())
 
 def before_payroll_cancel(doc, method):
-	if doc.custom_api_pushed:
-		frappe.throw(
-			msg=(
-				"Please use the <b>Request Cancellation</b> button "
-				"on the Payroll Entry form instead of cancelling directly. "
-				"This entry has already been sent to the external payment system."
-			),
-			title="Use Request Cancellation Button",
-		)
+	if not doc.custom_api_pushed:
+		return
+
+	frappe.throw(
+		msg=(
+			"Please use the <b>Request Cancellation</b> button "
+			"on the Payroll Entry form instead of cancelling directly. "
+			"This entry has already been sent to the external payment system."
+		),
+		title="Use Request Cancellation Button",
+	)
+
+def reset_amended_payroll_fields(doc, method):
+	"""
+	When a Payroll Entry is amended, reset all custom fields related
+	to payment status and amounts, so that it goes through the process again.
+	"""
+	if not doc.amended_from:
+		return
+
+	doc.custom_api_pushed = 0
+	doc.custom_payment_status = ""
+
+	doc.custom_salary_paid = 0
+	doc.custom_deduction_paid = 0
+
+	doc.custom_salary_pe_created = 0
+	doc.custom_deduction_pe_created = 0
+
+	doc.custom_total_salary = 0
+	doc.custom_total_deduction = 0
+
+	doc.custom_cancel_status = ""
+	doc.custom_cancel_reason = ""
+	doc.custom_cancel_rejection_reason = ""
