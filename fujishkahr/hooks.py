@@ -146,10 +146,9 @@ before_uninstall = "fujishkahr.install.before_uninstall"
 # DocType Class
 # ---------------
 # Override standard doctype classes
-
-override_doctype_class = {
-	"Leave Application": "fujishkahr.hr.leave_notifications.CustomLeaveApplication",
-}
+# override_doctype_class = {
+# 	"ToDo": "custom_app.overrides.CustomToDo"
+# }
 
 # Document Events
 # ---------------
@@ -190,9 +189,6 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
-		"fujishkahr.hr.holiday_reminders.send_holiday_reminders",
-		"fujishkahr.hr.birthday_reminders.send_birthday_reminders",
-		"fujishkahr.hr.anniversary_reminders.send_work_anniversary_reminders",
 	],
 	"cron": {
 		"*/1 * * * *": [
