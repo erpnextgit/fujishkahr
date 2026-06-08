@@ -95,6 +95,9 @@ def calculate_payroll_totals(doc):
 			elif component.is_employee_esi:
 				employee_esi += row.amount or 0
 
+			elif component.is_advance_recovery:
+				pass
+
 			else:
 				other_deductions += row.amount or 0
 
