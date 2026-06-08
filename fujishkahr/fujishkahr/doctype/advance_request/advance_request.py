@@ -9,6 +9,9 @@ import json
 
 class AdvanceRequest(Document):
 
+	def validate(self):
+		validate_approved_amount(self)
+
 	def on_submit(self):
 		if self.workflow_state == "Approved":
 			self.create_employee_advance()
@@ -198,3 +201,14 @@ def create_salary(employee, component, amount, date, advance_name, company, adva
 	doc.insert(ignore_permissions=True)
 	doc.submit()
 	return doc.name
+
+def validate_approved_amount(doc):
+	"""
+	Validates that the approved amount does not exceed the requested amount.
+	"""
+	if doc.requested_amount and doc.approved_amount:
+		if doc.approved_amount > doc.requested_amount:
+			frappe.throw(
+				f"Approved Amount ({doc.approved_amount}) cannot be greater than "
+				f"Requested Amount ({doc.requested_amount})."
+			)
