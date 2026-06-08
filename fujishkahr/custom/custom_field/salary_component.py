@@ -23,5 +23,11 @@ def get_salary_component_custom_fields():
 				"fieldname": "is_employee_esi",
 				"insert_after": "is_employee_pf",
 			},
+			{
+				"fieldtype": "Check",
+				"label": "Is Advance Recovery",
+				"fieldname": "is_advance_recovery",
+				"insert_after": "is_employee_esi",
+			},
 		]
 	}
