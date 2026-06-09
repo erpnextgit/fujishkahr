@@ -163,6 +163,7 @@ doc_events = {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
 		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
 		"on_submit":     "fujishkahr.api.payroll.on_salary_slip_submit",
+		"before_cancel": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.before_salary_slip_cancel",
 	},
 	"Payment Entry": {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
