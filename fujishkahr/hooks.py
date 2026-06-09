@@ -165,6 +165,9 @@ doc_events = {
 		"on_submit":     "fujishkahr.api.payroll.on_salary_slip_submit",
 		"before_cancel": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.before_salary_slip_cancel",
 	},
+	"Journal Entry": {
+		"before_cancel": "fujishkahr.fujishkahr.custom_scripts.journal_entry.journal_entry.before_journal_entry_cancel"
+	},
 	"Payment Entry": {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
 		"on_cancel": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_adv_req_status_on_cancel"
