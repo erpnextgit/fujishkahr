@@ -31,7 +31,6 @@
   overflow-y: visible !important;
 }
 
-
 .form-tabs-list {
   flex-wrap: wrap !important;
   position: sticky !important;
@@ -42,7 +41,6 @@
 .form-tabs .tab-content {
   padding-top: 4px !important;
 }
-
 
 /* ── Fix first row hidden behind tabs ── */
 .form-page {
