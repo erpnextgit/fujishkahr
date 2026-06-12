@@ -1,0 +1,261 @@
+/* ── Page container ── */
+.page-container {
+  padding: 0 0.5rem !important;
+}
+
+.container.page-body {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+/* ── Sidebar ── */
+.layout-side-section {
+  flex: 0 0 230px !important;
+  width: 230px !important;
+  min-width: 0 !important;
+}
+ 
+/* ── Main content area ── */
+.layout-main-section-wrapper {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  width: 0 !important;
+}
+
+.layout-main-section {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+.form-tabs-list {
+  flex-wrap: wrap !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: var(--card-bg, #fff) !important;
+}
+.form-tabs .tab-content {
+  padding-top: 4px !important;
+}
+
+/* ── Fix first row hidden behind tabs ── */
+.form-page {
+  padding-top: 0 !important;
+}
+.form-tabs {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ── Form ── */
+.form-layout .form-section .section-body .row,
+.form-layout .section-body {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.form-layout .form-column {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.frappe-control {
+  max-width: 100% !important;
+}
+
+/* Text inputs only — NOT checkboxes */
+.form-layout .form-column input[type="text"],
+.form-layout .form-column input[type="email"],
+.form-layout .form-column input[type="number"],
+.form-layout .form-column input[type="password"],
+.form-layout .form-column input[type="date"],
+.form-layout .form-column input[type="tel"],
+.form-layout .form-column input[type="search"],
+.form-layout .form-column select,
+.form-layout .form-column textarea,
+.form-layout .form-column .like-disabled-input,
+.form-layout .form-column .input-with-feedback:not([type="checkbox"]) {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-layout .form-column .control-label {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+/* ── Checkboxes ── */
+.checkbox .input-area,
+.frappe-control[data-fieldtype="Check"] .input-area {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  flex: none !important;
+}
+
+/* ── Checkbox size only — let theme handle appearance ── */
+.checkbox .input-area input[type="checkbox"],
+.checkbox input[type="checkbox"],
+.frappe-control[data-fieldtype="Check"] input[type="checkbox"],
+input.input-with-feedback[type="checkbox"] {
+  width: var(--checkbox-size, 14px) !important;
+  height: var(--checkbox-size, 14px) !important;
+  min-width: var(--checkbox-size, 14px) !important;
+  max-width: var(--checkbox-size, 14px) !important;
+  flex: none !important;
+  margin: 0 var(--checkbox-right-margin, 8px) 0 0 !important;
+  cursor: pointer !important;
+}
+
+/* ── Table row checkboxes ── */
+.grid-body .grid-row .col.row-check input[type="checkbox"],
+.grid-row-check input[type="checkbox"] {
+  width: var(--checkbox-size, 14px) !important;
+  height: var(--checkbox-size, 14px) !important;
+  min-width: var(--checkbox-size, 14px) !important;
+  max-width: var(--checkbox-size, 14px) !important;
+  flex: none !important;
+  cursor: pointer !important;
+}
+
+/* ── Workspace cards ── */
+.workspace-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.widget.shortcut-widget-box,
+.widget.links-widget-box,
+.widget.number-widget-box,
+.widget.chart-widget-box {
+  flex: 1 1 250px !important;
+  min-width: 200px !important;
+  max-width: 100% !important;
+}
+
+.number-widget-box .widget-body {
+  font-size: clamp(1.2rem, 2vw, 2rem) !important;
+}
+
+.widget.links-widget-box .link-item {
+  font-size: clamp(0.75rem, 1.2vw, 0.9rem) !important;
+}
+
+/* ── Tables & List ── */
+.datatable,
+.dt-scrollable {
+  overflow-x: auto !important;
+}
+
+.list-row {
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+}
+
+/* ── Dropdown menus ── */
+.dropdown-menu {
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+}
+
+/* ── Breakpoints ── */
+@media (max-width: 1280px) {
+  .layout-side-section {
+    flex: 0 0 200px !important;
+    width: 200px !important;
+  }
+  .widget.number-widget-box {
+    flex: 1 1 180px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout-side-section {
+    flex: 0 0 180px !important;
+    width: 180px !important;
+  }
+
+  .widget.shortcut-widget-box,
+  .widget.links-widget-box,
+  .widget.number-widget-box {
+    flex: 1 1 150px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-side-section {
+    flex: 0 0 160px !important;
+    width: 160px !important;
+  }
+  .form-tabs-list .nav-item a {
+    font-size: 12px !important;
+    padding: 5px 8px !important;
+  }
+}
+
+/* Top navbar only - align logo with Home menu icon */
+.navbar .container,
+.navbar .container-fluid,
+header .container,
+header .container-fluid {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 10px !important;
+    padding-right: 20px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.page-head > .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.page-head .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Keep Home / Payruns old alignment */
+.page-head .page-title {
+    margin-left: -15px !important;
+}
+
+.page-head [class*="col-"] {
+    padding-left: 0 !important;
+}
+
+/* Align page action buttons with same right margin */
+.page-head .page-actions {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Keep all action buttons inside same spacing */
+.page-head .page-actions .btn {
+    margin-right: 8px !important;
+}
+
+/* Last button should have same right edge */
+.page-head .page-actions .btn:last-child {
+    margin-right: 0 !important;
+}
