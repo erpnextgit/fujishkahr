@@ -31,14 +31,18 @@
   overflow-y: visible !important;
 }
 
-/* ── Tab bar — wrap only, no sticky (sticky breaks dropdowns) ── */
+
 .form-tabs-list {
   flex-wrap: wrap !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: var(--card-bg, #fff) !important;
 }
-
 .form-tabs .tab-content {
   padding-top: 4px !important;
 }
+
 
 /* ── Fix first row hidden behind tabs ── */
 .form-page {
