@@ -73,18 +73,19 @@
   max-width: 100% !important;
 }
 
-/* Text inputs only — NOT checkboxes */
+/* Text inputs only — NOT checkboxes and NOT inner components of popovers/pickers */
 .form-layout .form-column input[type="text"],
 .form-layout .form-column input[type="email"],
 .form-layout .form-column input[type="number"],
 .form-layout .form-column input[type="password"],
 .form-layout .form-column input[type="date"],
+.form-layout .form-column input[type="time"],
 .form-layout .form-column input[type="tel"],
 .form-layout .form-column input[type="search"],
 .form-layout .form-column select,
 .form-layout .form-column textarea,
 .form-layout .form-column .like-disabled-input,
-.form-layout .form-column .input-with-feedback:not([type="checkbox"]) {
+.form-layout .form-column .input-with-feedback:not([type="checkbox"]):not(.time-picker *):not(.popover *):not(.clockpicker-popover *) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -107,7 +108,7 @@
   flex: none !important;
 }
 
-/* ── Checkbox size only — let theme handle appearance ── */
+/* ── Checkbox size only ── */
 .checkbox .input-area input[type="checkbox"],
 .checkbox input[type="checkbox"],
 .frappe-control[data-fieldtype="Check"] input[type="checkbox"],
@@ -208,7 +209,7 @@ input.input-with-feedback[type="checkbox"] {
   }
 }
 
-/* Top navbar only - align logo with Home menu icon */
+/* Top navbar rules */
 .navbar .container,
 .navbar .container-fluid,
 header .container,
@@ -258,4 +259,30 @@ header .container-fluid {
 /* Last button should have same right edge */
 .page-head .page-actions .btn:last-child {
     margin-right: 0 !important;
+}
+
+/* ── FIXED TIME FIELD OVERRIDES ── */
+input[type="time"].form-control,
+.frappe-control input.input-with-feedback {
+    background-color: var(--card-bg, #ffffff) !important;
+    border: 1px solid var(--border-color, #d9e1e8) !important;
+    box-shadow: none !important;
+}
+
+/* Total layout protection for time picker dropdowns */
+.time-picker, .popover, .ui-datepicker, .clockpicker-popover {
+    background: var(--modal-bg, #ffffff) !important;
+    border: 1px solid var(--border-color, #d9e1e8) !important;
+    box-shadow: var(--shadow-md) !important;
+    z-index: 1050 !important;
+    width: auto !important;
+    display: block !important;
+}
+
+/* Protect lists inside the time component from stretching horizontally */
+.time-picker *, .clockpicker-popover * {
+    width: auto !important;
+    max-width: initial !important;
+    min-width: initial !important;
+    box-sizing: content-box !important;
 }
