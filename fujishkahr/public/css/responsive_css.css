@@ -287,8 +287,7 @@ input[type="time"].form-control,
     box-sizing: content-box !important;
 }
 
-/* 1. Force all form layout levels, columns, and sections to allow elements to pop out */
-.layout-main-section-wrapper,
+/* NOTE: .layout-main-section-wrapper is excluded here to preserve sidebar scrolling layout mechanics */
 .layout-main-section,
 .form-page,
 .form-layout,
@@ -300,10 +299,9 @@ input[type="time"].form-control,
   overflow: visible !important;
 }
 
-/* 2. Elevate the dropdown list to float clearly above all boundaries */
 .awesomplete > ul,
 .dropdown-menu,
 .link-field-dropdown {
   position: absolute !important;
-  z-index: 9999 !important; /* Ensure it stays completely on top */
+  z-index: 9999 !important;
 }
