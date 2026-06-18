@@ -286,3 +286,22 @@ input[type="time"].form-control,
     min-width: initial !important;
     box-sizing: content-box !important;
 }
+
+/* NOTE: .layout-main-section-wrapper is excluded here to preserve sidebar scrolling layout mechanics */
+.layout-main-section,
+.form-page,
+.form-layout,
+.form-section,
+.section-body,
+.form-column,
+.frappe-control,
+.awesomplete {
+  overflow: visible !important;
+}
+
+.awesomplete > ul,
+.dropdown-menu,
+.link-field-dropdown {
+  position: absolute !important;
+  z-index: 9999 !important;
+}
