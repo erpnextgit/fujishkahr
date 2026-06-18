@@ -26,22 +26,7 @@ def get_bench_bin():
 	frappe.throw("bench binary not found.")
 
 def get_mariadb_credentials():
-	"""Read MariaDB credentials from common_site_config.json."""
-	bench_path = get_bench_path()
-	config_path = os.path.join(bench_path, 'sites', 'common_site_config.json')
-	try:
-		with open(config_path) as f:
-			config = json.load(f)
-		password = config.get('root_password', '')
-		username = config.get('root_login', 'root')
-		if not password:
-			frappe.throw(
-				"root_password not found in common_site_config.json. "
-				"Ask your server team to add it."
-			)
-		return username, password
-	except FileNotFoundError:
-		frappe.throw(f"common_site_config.json not found at {config_path}")
+	return "root", "fujishka"
 
 @frappe.whitelist()
 def create_new_site(site_name, admin_password="admin"):
