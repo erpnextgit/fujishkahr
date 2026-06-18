@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Branch Integration', {
 	refresh: function(frm) {
+		filter_branch(frm);
 
 		// Skip if new unsaved record
 		if (frm.is_new()) return;
@@ -212,83 +213,116 @@ frappe.ui.form.on('Branch Integration', {
 		frm.set_df_property('company_code',    'read_only', should_lock ? 1 : 0);
 		frm.set_df_property('branch_code',     'read_only', should_lock ? 1 : 0);
 		frm.set_df_property('branch_password', 'read_only', should_lock ? 1 : 0);
-	}
+	},
+	onload: function(frm) {
+		// Filter branch options based on selected company
+		filter_branch(frm);
+	},
+	company_code: function(frm) {
+		// Clear branch field when company code changes
+		frm.set_value('branch', null);
+		filter_branch(frm);
+	},
+	company: function(frm) {
+		// Clear branch field when company changes
+		frm.set_value('branch', null);
+		filter_branch(frm);
+	},
 });
 
 // Registration API Call
 // Used for both fresh registration and re-registration
 function call_registration_api(frm) {
+	// Step 1: Generate callback token first
 	frappe.call({
-		method: "call_external_registration_api",
-		args: {
-			company_code:    frm.doc.company_code,
-			branch_code:     frm.doc.branch_code,
-			branch_password: frm.doc.branch_password
-		},
+		method: "fujishkahr.api.api.generate_callback_token",
+		args: { branch_name: frm.doc.name },
 		freeze: true,
-		freeze_message: __("Connecting to Fujishka API..."),
-		callback: function(r) {
-			let res = r.message;
-			if (!res) return;
+		freeze_message: __("Preparing Registration..."),
+		callback: function(token_res) {
+			let callback_token = token_res.message;
 
-			if (res.status === "Success") {
-				frappe.call({
-					method: "frappe.client.set_value",
-					args: {
-						doctype: "Branch Integration",
-						name: frm.doc.name,
-						fieldname: {
-							token:                     res.token,
-							endpoint:                  res.endpoint,
-							branch_erpnext_status:     "",
-							branch_erpnext_sts_remark: "Registered successfully. Please request approval.",
-							api_response:              res.full_response || ""
-						}
-					},
-					callback: function() {
-						frappe.show_alert({
-							message: __('Registration Successful! Now click "Request Branch Approval".'),
-							indicator: 'green'
-						});
-						frm.reload_doc();
-					}
-				});
-
-			} else {
-				let raw       = res.full_response || "";
-				let error_msg = res.error;
-
-				if (!error_msg && raw.includes('error":"')) {
-					error_msg = raw.split('error":"')[1].split('"')[0];
-				}
-				if (!error_msg) {
-					error_msg = "Registration failed. Please try again.";
-				}
-
-				frappe.call({
-					method: "frappe.client.set_value",
-					args: {
-						doctype: "Branch Integration",
-						name: frm.doc.name,
-						fieldname: {
-							api_response: res.full_response || ""
-						}
-					}
-				});
-
+			if (!callback_token) {
 				frappe.msgprint({
-					title: __('Registration Failed'),
+					title: __('Error'),
 					indicator: 'red',
-					message: `<div style="padding:5px;">
-						<p style="color:#d9534f;font-weight:bold;">
-							Reason: ${error_msg}
-						</p>
-						<p style="font-size:11px;color:#888;">
-							Please check your Company Code, Branch Code and Password.
-						</p>
-					</div>`
+					message: __('Failed to generate callback token.')
 				});
+				return;
 			}
+
+			// Step 2: Call registration API with callback_token
+			frappe.call({
+				method: "call_external_registration_api",
+				args: {
+					company_code:    frm.doc.company_code,
+					branch_code:     frm.doc.branch_code,
+					branch_password: frm.doc.branch_password,
+					base_url:        window.location.origin,
+					branch_name:     frm.doc.name,
+					callback_token:  callback_token
+				},
+				freeze: true,
+				freeze_message: __("Connecting to Fujishka API..."),
+				callback: function(r) {
+					let res = r.message;
+					if (!res) return;
+
+					if (res.status === "Success") {
+						// Step 3: Save all fields to Branch Integration
+						frappe.call({
+							method: "frappe.client.set_value",
+							args: {
+								doctype: "Branch Integration",
+								name: frm.doc.name,
+								fieldname: {
+									token:                     res.token,
+									endpoint:                  res.endpoint,
+									callback_token:            callback_token,
+									branch_erpnext_status:     "",
+									branch_erpnext_sts_remark: "Registered successfully. Please request approval.",
+									api_response:              res.full_response || ""
+								}
+							},
+							callback: function() {
+								frappe.show_alert({
+									message: __('Registration Successful! Now click "Request Branch Approval".'),
+									indicator: 'green'
+								});
+								frm.reload_doc();
+							}
+						});
+
+					} else {
+						frappe.msgprint({
+							title: __('Registration Failed'),
+							indicator: 'red',
+							message: `<div style="padding:5px;">
+								<p style="color:#d9534f;font-weight:bold;">
+									Reason: ${res.error || "Unknown Error"}
+								</p>
+								<p style="font-size:11px;color:#888;">
+									Please check your Company Code, Branch Code and Password.
+								</p>
+							</div>`
+						});
+					}
+				}
+			});
 		}
 	});
+}
+
+/*
+ * function to filter branch field based on selected company
+ * only branches of the same company will be shown in the branch field
+ */
+function filter_branch(frm) {
+	frm.set_query("branch", function() {
+		return {
+			filters: {
+				"company": frm.doc.company
+			}
+		}
+	})
 }

@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestFujishkahrSettings(FrappeTestCase):
+class TestCompanyWaysSettings(FrappeTestCase):
 	pass

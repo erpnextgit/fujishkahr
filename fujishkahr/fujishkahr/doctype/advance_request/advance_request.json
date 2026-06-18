@@ -21,6 +21,11 @@
   "column_break_lqxm",
   "requested_amount",
   "approved_amount",
+  "section_break_5dbr",
+  "api_response",
+  "api_status",
+  "column_break_teqr",
+  "rejection_reason",
   "amended_from"
  ],
  "fields": [
@@ -117,7 +122,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "\nDraft\nPending HR\nPending CEO\nApproved by HR\nRejected by HR\nApproved\nRejected\nPayment Initiated\nPaid\nUnpaid"
+   "options": "\nDraft\nPending HR\nPending CEO\nApproved by HR\nRejected by HR\nApproved\nRejected\nPayment Initiated\nPaid\nUnpaid\nPayment Rejected"
   },
   {
    "fetch_from": "company.default_employee_advance_account",
@@ -133,13 +138,43 @@
    "fieldtype": "Date",
    "label": "Payment Credit Date",
    "permlevel": 1
+  },
+  {
+   "fieldname": "section_break_5dbr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "api_response",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "API Response"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "\nSent\nFailed\nError\nCompleted\nPayment Rejected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_teqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rejection_reason",
+   "fieldtype": "Long Text",
+   "label": "Rejection Reason",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-14 16:08:12.970306",
+ "modified": "2026-04-27 16:22:49.469497",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Advance Request",

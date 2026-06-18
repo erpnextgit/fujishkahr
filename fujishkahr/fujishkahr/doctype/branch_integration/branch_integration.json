@@ -7,11 +7,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "company_code",
+  "column_break_7tq2",
+  "branch",
   "branch_code",
   "branch_password",
+  "section_break_09mo",
   "token",
   "endpoint",
+  "callback_token",
   "api_response",
   "section_break_hxsl",
   "status",
@@ -21,11 +26,13 @@
  ],
  "fields": [
   {
+   "fetch_from": "company.company_code",
    "fieldname": "company_code",
    "fieldtype": "Data",
    "label": "Company Code"
   },
   {
+   "fetch_from": "branch.branch_code",
    "fieldname": "branch_code",
    "fieldtype": "Data",
    "label": "Branch Code"
@@ -49,7 +56,7 @@
   },
   {
    "fieldname": "api_response",
-   "fieldtype": "Small Text",
+   "fieldtype": "Long Text",
    "hidden": 1,
    "label": "Api Response"
   },
@@ -82,12 +89,41 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Approval Response"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "column_break_7tq2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_09mo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "callback_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Callback Token",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-24 16:35:31.631497",
+ "modified": "2026-04-29 14:53:35.056611",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Branch Integration",

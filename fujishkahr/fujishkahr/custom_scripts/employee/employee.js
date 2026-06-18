@@ -15,10 +15,12 @@ frappe.ui.form.on("Employee", {
 		});
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 	onload: function(frm) {
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 	validate(frm) {
 		validate_probation_dates(frm);
@@ -40,6 +42,7 @@ frappe.ui.form.on("Employee", {
 	company: function(frm) {
 		filter_reports_to_company(frm);
 		filter_holiday_list(frm);
+		filter_default_shift(frm);
 	},
 });
 
@@ -65,6 +68,9 @@ function set_probation_dates(frm) {
 	if (!frm.doc.probation_end_date) {
 		frappe.call({
 			method: "fujishkahr.fujishkahr.custom_scripts.employee.employee.get_default_probation_period",
+			args: {
+			company: frm.doc.company
+			},
 			callback: function(r) {
 				if (r.message && r.message > 0) {
 					let end_date = frappe.datetime.add_days(start_date, r.message);
@@ -72,7 +78,7 @@ function set_probation_dates(frm) {
 				} else {
 					frappe.msgprint({
 						title: __('Missing Data'),
-						message: __('Default Probation Period is not set in Fujishkahr Settings.'),
+						message: __('Default Probation Period is not set in Company Ways Settings.'),
 						indicator: 'red'
 					});
 					frm.set_value('probation_end_date', null);
@@ -130,6 +136,19 @@ function filter_reports_to_company(frm) {
  */
 function filter_holiday_list(frm) {
 	frm.set_query("holiday_list", function() {
+		return {
+			filters: {
+				"company": frm.doc.company
+			}
+		}
+	})
+}
+
+/*
+ * function to filter  default shift field based on selected company
+ */
+function filter_default_shift(frm) {
+	frm.set_query("default_shift", function() {
 		return {
 			filters: {
 				"company": frm.doc.company

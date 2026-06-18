@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class FujishkahrSettings(Document):
+class CompanyWaysSettings(Document):
 	pass

@@ -24,7 +24,8 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 app_include_css = [
-	"assets/fujishkahr/css/fujishka_theme.css"
+	"assets/fujishkahr/css/fujishka_theme.css",
+	"assets/fujishkahr/css/responsive_css.css",
 ]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/fujishkahr/css/fujishkahr.css"
@@ -53,6 +54,8 @@ doctype_js = {
 	"Timesheet": "fujishkahr/custom_scripts/timesheet/timesheet.js",
 	"Holiday List": "fujishkahr/custom_scripts/holiday_list/holiday_list.js",
 	"Employee Checkin": "fujishkahr/custom_scripts/employee_checkin/employee_checkin.js",
+	"Shift Assignment": "fujishkahr/custom_scripts/shift_assignment/shift_assignment.js",
+	"Payroll Entry": "fujishkahr/custom_scripts/payroll_entry/payroll_entry.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -145,9 +148,9 @@ before_uninstall = "fujishkahr.install.before_uninstall"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Leave Application": "fujishkahr.hr.leave_notifications.CustomLeaveApplication",
+}
 
 # Document Events
 # ---------------
@@ -159,11 +162,26 @@ doc_events = {
 	},
 	"Salary Slip": {
 		"before_save": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
-		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days"
+		"before_submit": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.set_fixed_30_days",
+		"on_submit":     "fujishkahr.api.payroll.on_salary_slip_submit",
+		"before_cancel": "fujishkahr.fujishkahr.custom_scripts.salary_slip.salary_slip.before_salary_slip_cancel",
+	},
+	"Journal Entry": {
+		"before_cancel": "fujishkahr.fujishkahr.custom_scripts.journal_entry.journal_entry.before_journal_entry_cancel"
 	},
 	"Payment Entry": {
 		"on_submit": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_advance_request_status",
 		"on_cancel": "fujishkahr.fujishkahr.custom_scripts.payment_entry.payment_entry.update_adv_req_status_on_cancel"
+	},
+	"Advance Request": {
+		"on_change": "fujishkahr.api.api.on_change",
+	},
+	"Branch": {
+		"before_insert": "fujishkahr.fujishkahr.custom_scripts.branch.branch.set_branch_name",
+	},
+	"Payroll Entry": {
+		"before_cancel": "fujishkahr.api.payroll.before_payroll_cancel",
+		"validate": "fujishkahr.api.payroll.reset_amended_payroll_fields",
 	},
 }
 
@@ -177,7 +195,15 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		"fujishkahr.fujishkahr.custom_scripts.employee.employee.notify_hr_probation",
+		"fujishkahr.hr.holiday_reminders.send_holiday_reminders",
+		"fujishkahr.hr.birthday_reminders.send_birthday_reminders",
+		"fujishkahr.hr.anniversary_reminders.send_work_anniversary_reminders",
 	],
+	"cron": {
+		"*/1 * * * *": [
+			"fujishkahr.api.payroll.process_pending_payroll_entries"
+		]
+	}
 }
 
 # 	"hourly": [

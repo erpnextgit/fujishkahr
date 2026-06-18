@@ -7,17 +7,18 @@ frappe.ui.form.on("Timesheet", {
 	}
 });
 
-// Hide currency and exchange rate fields based on Fujishkahr Settings
+// Hide currency and exchange rate fields based on Company Ways Settings Settings
 function hide_currency_fields(frm) {
-	frappe.db.get_single_value("Fujishkahr Settings", "hide_currency_fields")
-	.then(value => {
-		if (value) {
-			frm.set_df_property("currency", "hidden", true);
-			frm.set_df_property("exchange_rate", "hidden", true);
-		}
-		else {
-			frm.set_df_property("currency", "hidden", false);
-			frm.set_df_property("exchange_rate", "hidden", false);
-		}
-	})
+	const company = frm.doc.company
+		|| frappe.defaults.get_default("company");
+
+	frappe.db.get_value(
+		"Company Ways Settings",
+		{"company": company},
+		"hide_currency_fields"
+	).then(r => {
+		const value = r.message?.hide_currency_fields;
+		frm.set_df_property("currency", "hidden", value ? true : false);
+		frm.set_df_property("exchange_rate", "hidden", value ? true : false);
+	});
 }
