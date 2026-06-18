@@ -4,7 +4,7 @@ import os
 import re
 import json
 
-DOMAIN = "hr.fujishkaerp.com"
+DOMAIN = "fujishkahrms.com"
 
 def get_bench_path():
 	return os.path.abspath(
@@ -57,7 +57,7 @@ def create_new_site(site_name, admin_password="admin"):
 			"admin_password": "admin"
 		}
 
-	site_name auto-becomes: testsite.hr.fujishkaerp.com
+	site_name auto-becomes: testsite.fujishkahrms.com.com
 	"""
 
 	if not frappe.has_permission("System Settings", "write"):
