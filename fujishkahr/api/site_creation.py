@@ -26,7 +26,7 @@ def get_bench_bin():
 	frappe.throw("bench binary not found.")
 
 def get_mariadb_credentials():
-	return "root", "fujishka"
+	return "root", "fujishka!"
 
 @frappe.whitelist()
 def create_new_site(site_name, admin_password="admin"):
