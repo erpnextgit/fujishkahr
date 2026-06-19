@@ -4,7 +4,7 @@ import os
 import re
 import json
 
-DOMAIN = "fujishkahrms.com"
+DOMAIN = "uat.fujishkahrms.com"
 
 def get_bench_path():
 	return os.path.abspath(
