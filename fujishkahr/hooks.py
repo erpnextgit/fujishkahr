@@ -95,19 +95,14 @@ doctype_js = {
 # Installation
 # ------------
 
-# before_install = "stems.install.before_install"
+# before_install = "fujishkahr.install.before_install"
 after_install = "fujishkahr.install.after_install"
-
-# Migration
-# ------------
-
-before_migrate = "fujishkahr.setup.before_migrate"
 after_migrate = "fujishkahr.setup.after_migrate"
 
 # Uninstallation
 # ------------
 
-before_uninstall = "fujishkahr.install.before_uninstall"
+before_uninstall = "fujishkahr.uninstall.before_uninstall"
 # after_uninstall = "fujishkahr.uninstall.after_uninstall"
 
 # Integration Setup
