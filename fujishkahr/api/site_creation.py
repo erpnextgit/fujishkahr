@@ -245,6 +245,37 @@ def create_site_job(
 					"install-app",
 					"fujishkahr"
 				]
+			),
+
+			(
+				"Running Migration",
+				[
+					bench_bin,
+					"--site",
+					site_name,
+					"migrate"
+				]
+			),
+
+			(
+				"Building Assets",
+				[
+					bench_bin,
+					"build",
+					"--app",
+					"fujishkahr"
+				]
+			),
+
+			(
+				"Applying HR Setup",
+				[
+					bench_bin,
+					"--site",
+					site_name,
+					"execute",
+					"fujishkahr.setup.setup_hr_modules"
+				]
 			)
 
 		]
