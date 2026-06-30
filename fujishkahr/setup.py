@@ -107,3 +107,147 @@ def get_fujishkahr_roles():
 	'''
 	return ['Fujishka HR', 'Fujishka Employee', 'CEO']
 
+ALLOWED_WORKSPACES = [
+	"HR",
+	"Payroll",
+	"Fujishka HR",
+	"Payruns",
+	"Fujishka Employee",
+]
+
+
+def setup_hr_modules():
+
+	workspaces = frappe.get_all(
+		"Workspace",
+		pluck="name"
+	)
+
+	for workspace_name in workspaces:
+
+		try:
+
+			workspace = frappe.get_doc(
+				"Workspace",
+				workspace_name
+			)
+
+			workspace.public = (
+				1
+				if workspace_name
+				in ALLOWED_WORKSPACES
+				else 0
+			)
+
+			workspace.save(
+				ignore_permissions=True
+			)
+
+		except Exception:
+
+			frappe.log_error(
+				frappe.get_traceback(),
+				f"Workspace update failed: {workspace_name}"
+			)
+
+	create_hr_module_profile()
+
+	frappe.db.commit()
+
+def create_hr_module_profile():
+
+	profile_name = "HR Only"
+
+	allowed = [
+		"Desk",
+		"HR",
+		"Payroll",
+		"Fujishkahr"
+	]
+
+	if frappe.db.exists(
+		"Module Profile",
+		profile_name
+	):
+
+		doc = frappe.get_doc(
+			"Module Profile",
+			profile_name
+		)
+
+		doc.block_modules = []
+
+	else:
+
+		doc = frappe.new_doc(
+			"Module Profile"
+		)
+
+		doc.module_profile_name = (
+			profile_name
+		)
+
+	all_modules = frappe.get_all(
+		"Module Def",
+		pluck="name"
+	)
+
+	for module in all_modules:
+
+		if module not in allowed:
+
+			doc.append(
+				"block_modules",
+				{
+					"module": module
+				}
+			)
+
+	try:
+
+		doc.flags.ignore_version = True
+
+		doc.save(
+			ignore_permissions=True
+		)
+
+	except frappe.DocumentLockedError:
+
+		frappe.logger().warning(
+			"Module Profile locked. Skipped."
+		)
+
+	frappe.db.commit()
+
+def assign_module_profile_to_user(
+	doc,
+	method=None
+):
+
+	if doc.name in (
+		"Administrator",
+		"Guest"
+	):
+		return
+
+	if not frappe.db.exists(
+		"Module Profile",
+		"HR Only"
+	):
+		return
+
+	user = frappe.get_doc(
+		"User",
+		doc.name
+	)
+
+	user.module_profile = (
+		"HR Only"
+	)
+
+	user.save(
+		ignore_permissions=True
+	)
+
+	frappe.db.commit()
+

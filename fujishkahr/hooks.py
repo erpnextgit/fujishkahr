@@ -57,6 +57,7 @@ doctype_js = {
 	"Shift Assignment": "fujishkahr/custom_scripts/shift_assignment/shift_assignment.js",
 	"Payroll Entry": "fujishkahr/custom_scripts/payroll_entry/payroll_entry.js",
 	"User": "fujishkahr/custom_scripts/user/user.js",
+	"Module Profile": "fujishkahr/custom_scripts/module_profile/module_profile.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -179,6 +180,9 @@ doc_events = {
 		"before_cancel": "fujishkahr.api.payroll.before_payroll_cancel",
 		"validate": "fujishkahr.api.payroll.reset_amended_payroll_fields",
 	},
+	"User": {
+		"after_insert": "fujishkahr.setup.assign_module_profile_to_user",
+	}
 }
 
 # Scheduled Tasks
