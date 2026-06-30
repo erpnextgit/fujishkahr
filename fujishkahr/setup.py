@@ -126,20 +126,15 @@ def setup_hr_modules():
 
 		try:
 
-			workspace = frappe.get_doc(
+			frappe.db.set_value(
 				"Workspace",
-				workspace_name
-			)
-
-			workspace.public = (
+				workspace_name,
+				"public",
 				1
 				if workspace_name
 				in ALLOWED_WORKSPACES
-				else 0
-			)
-
-			workspace.save(
-				ignore_permissions=True
+				else 0,
+				update_modified=False
 			)
 
 		except Exception:
@@ -148,6 +143,8 @@ def setup_hr_modules():
 				frappe.get_traceback(),
 				f"Workspace update failed: {workspace_name}"
 			)
+
+	frappe.clear_cache()
 
 	create_hr_module_profile()
 
