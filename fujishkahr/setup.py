@@ -85,7 +85,6 @@ def create_custom_roles(roles):
 				"role_name": role
 			})
 			role_doc.insert(ignore_permissions=True)
-	frappe.db.commit()
 
 def create_property_setters(property_setter_datas):
 	'''
@@ -106,4 +105,142 @@ def get_fujishkahr_roles():
 		Method to get fujishkahr specific roles
 	'''
 	return ['Fujishka HR', 'Fujishka Employee', 'CEO']
+
+ALLOWED_WORKSPACES = [
+	"HR",
+	"Payroll",
+	"Fujishka HR",
+	"Payruns",
+	"Fujishka Employee",
+]
+
+
+def setup_hr_modules():
+
+	workspaces = frappe.get_all(
+		"Workspace",
+		pluck="name"
+	)
+
+	for workspace_name in workspaces:
+
+		try:
+
+			frappe.db.set_value(
+				"Workspace",
+				workspace_name,
+				"public",
+				1
+				if workspace_name
+				in ALLOWED_WORKSPACES
+				else 0,
+				update_modified=False
+			)
+
+		except Exception:
+
+			frappe.log_error(
+				frappe.get_traceback(),
+				f"Workspace update failed: {workspace_name}"
+			)
+
+	frappe.clear_cache()
+
+	create_hr_module_profile()
+
+
+def create_hr_module_profile():
+
+	profile_name = "HR Only"
+
+	allowed = [
+		"Desk",
+		"HR",
+		"Payroll",
+		"Fujishkahr"
+	]
+
+	if frappe.db.exists(
+		"Module Profile",
+		profile_name
+	):
+
+		doc = frappe.get_doc(
+			"Module Profile",
+			profile_name
+		)
+
+		doc.block_modules = []
+
+	else:
+
+		doc = frappe.new_doc(
+			"Module Profile"
+		)
+
+		doc.module_profile_name = (
+			profile_name
+		)
+
+	all_modules = frappe.get_all(
+		"Module Def",
+		pluck="name"
+	)
+
+	for module in all_modules:
+
+		if module not in allowed:
+
+			doc.append(
+				"block_modules",
+				{
+					"module": module
+				}
+			)
+
+	try:
+
+		doc.flags.ignore_version = True
+
+		doc.save(
+			ignore_permissions=True
+		)
+
+	except frappe.DocumentLockedError:
+
+		frappe.logger().warning(
+			"Module Profile locked. Skipped."
+		)
+
+
+def assign_module_profile_to_user(
+	doc,
+	method=None
+):
+
+	if doc.name in (
+		"Administrator",
+		"Guest"
+	):
+		return
+
+	if not frappe.db.exists(
+		"Module Profile",
+		"HR Only"
+	):
+		return
+
+	user = frappe.get_doc(
+		"User",
+		doc.name
+	)
+
+	user.module_profile = (
+		"HR Only"
+	)
+
+	user.save(
+		ignore_permissions=True
+	)
+
 

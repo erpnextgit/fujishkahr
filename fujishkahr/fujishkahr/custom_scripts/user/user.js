@@ -1,6 +1,5 @@
 frappe.ui.form.on("User", {
 	refresh(frm) {
-        console.log("User form refreshed");
 
 		setTimeout(() => {
 
@@ -43,7 +42,7 @@ frappe.ui.form.on("User", {
 
 				});
 
-		}, 800);
+		}, 10);
 
 	}
 });
