@@ -85,7 +85,6 @@ def create_custom_roles(roles):
 				"role_name": role
 			})
 			role_doc.insert(ignore_permissions=True)
-	frappe.db.commit()
 
 def create_property_setters(property_setter_datas):
 	'''
@@ -152,7 +151,6 @@ def setup_hr_modules():
 
 	create_hr_module_profile()
 
-	frappe.db.commit()
 
 def create_hr_module_profile():
 
@@ -217,7 +215,6 @@ def create_hr_module_profile():
 			"Module Profile locked. Skipped."
 		)
 
-	frappe.db.commit()
 
 def assign_module_profile_to_user(
 	doc,
@@ -249,5 +246,4 @@ def assign_module_profile_to_user(
 		ignore_permissions=True
 	)
 
-	frappe.db.commit()
 
