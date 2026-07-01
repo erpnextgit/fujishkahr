@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Payruns",
  "links": [],
- "modified": "2026-04-08 15:25:37.259420",
+ "modified": "2026-07-01 11:31:51.354166",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Payruns",
@@ -63,7 +63,20 @@
    "quick_list_filter": "[[\"Advance Request\",\"workflow_state\",\"=\",\"Initiate Payment\",false]]"
   }
  ],
- "roles": [],
+ "roles": [
+  {
+   "role": "Fujishka HR"
+  },
+  {
+   "role": "Fujishka Employee"
+  },
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "HR Manager"
+  }
+ ],
  "sequence_id": 41.0,
  "shortcuts": [
   {
