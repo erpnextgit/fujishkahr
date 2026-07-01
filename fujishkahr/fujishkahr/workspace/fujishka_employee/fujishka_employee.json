@@ -13,12 +13,12 @@
  "for_user": "",
  "hide_custom": 0,
  "icon": "share",
- "idx": 0,
+ "idx": 1,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "Fujishka Employee",
  "links": [],
- "modified": "2026-01-19 11:17:00.714260",
+ "modified": "2026-07-01 11:32:36.499666",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Fujishka Employee",
@@ -60,7 +60,20 @@
    "quick_list_filter": "[]"
   }
  ],
- "roles": [],
+ "roles": [
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "Fujishka Employee"
+  },
+  {
+   "role": "Fujishka HR"
+  },
+  {
+   "role": "HR Manager"
+  }
+ ],
  "sequence_id": 40.0,
  "shortcuts": [],
  "title": "Fujishka Employee"

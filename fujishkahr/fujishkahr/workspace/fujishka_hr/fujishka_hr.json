@@ -504,7 +504,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-30 16:10:21.559719",
+ "modified": "2026-07-01 11:21:13.352923",
  "modified_by": "Administrator",
  "module": "Fujishkahr",
  "name": "Fujishka HR",
@@ -545,6 +545,12 @@
  "roles": [
   {
    "role": "Fujishka HR"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
   }
  ],
  "sequence_id": 39.0,
