@@ -1,0 +1,32 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/frappe/deploy_tmp
+    overwrite: true
+
+permissions:
+  - object: /home/frappe/deploy_tmp
+    owner: frappe
+    group: frappe
+    mode: 755
+    type:
+      - directory
+      - file
+
+hooks:
+  BeforeInstall:
+    - location: scripts/backup.sh
+      timeout: 300
+      runas: frappe
+
+  AfterInstall:
+    - location: scripts/deploy.sh
+      timeout: 900
+      runas: frappe
+
+  ApplicationStart:
+    - location: scripts/cleanup.sh
+      timeout: 300
+      runas: frappe
