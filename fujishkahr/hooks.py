@@ -58,6 +58,7 @@ doctype_js = {
 	"Payroll Entry": "fujishkahr/custom_scripts/payroll_entry/payroll_entry.js",
 	"User": "fujishkahr/custom_scripts/user/user.js",
 	"Module Profile": "fujishkahr/custom_scripts/module_profile/module_profile.js",
+	"Role Profile": "fujishkahr/custom_scripts/role_profile/role_profile.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
